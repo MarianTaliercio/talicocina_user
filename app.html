@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tali Cocina · App</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g1:#1a3a1a;--g2:#2d5a2d;--g3:#4a8c3f;--g4:#7ec870;--g5:#d4edcc;--g6:#f0f9ec;
+  --ink:#1c1c1a;--ink2:#3d3d3a;--ink3:#6b6b66;--ink4:#a8a8a2;
+  --line:#e4e4de;--bg:#f7f6f2;--white:#fff;
+  --amber:#c47d0e;--amber2:#fef3dc;
+  --blue:#1565c0;--blue2:#e3f2fd;
+  --red:#c62828;--red2:#ffebee;
+  --r:14px;--rs:8px;--rx:5px;
+  --sh:0 1px 8px rgba(0,0,0,.06);--sh2:0 4px 20px rgba(0,0,0,.1);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px}
+h1,h2,h3,.serif{font-family:'Playfair Display',serif}
+a{color:var(--g3);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ── LAYOUT ── */
+.page{max-width:960px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.page-narrow{max-width:520px;margin:0 auto;padding:2rem 1.5rem 4rem}
+
+/* ── TOP NAV ── */
+.topnav{background:var(--g1);position:sticky;top:0;z-index:50}
+.topnav-inner{max-width:960px;margin:0 auto;padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-brand-icon{width:36px;height:36px;border-radius:50%;background:var(--white);display:flex;align-items:center;justify-content:center;font-size:18px}
+.nav-brand-name{font-family:'Playfair Display',serif;color:var(--white);font-size:18px;font-weight:700}
+.nav-brand-sub{font-size:11px;color:rgba(255,255,255,.6)}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-link{font-size:13px;color:rgba(255,255,255,.75);padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .15s;border:1px solid transparent}
+.nav-link:hover{color:white;background:rgba(255,255,255,.1)}
+.nav-link.active{color:white;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2)}
+.nav-user{display:flex;align-items:center;gap:8px}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--g4);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--g1);cursor:pointer}
+.nav-plan-badge{font-size:11px;background:var(--g4);color:var(--g1);padding:3px 8px;border-radius:12px;font-weight:500}
+
+/* ── SCREENS ── */
+.screen{display:none}
+.screen.on{display:block;animation:fadeUp .25s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:var(--r);border:1px solid var(--line);padding:1.5rem;margin-bottom:1rem}
+.card-sm{background:var(--white);border-radius:var(--rs);border:1px solid var(--line);padding:1rem;margin-bottom:.75rem}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:1.25rem}
+.form-label{font-size:12px;font-weight:500;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
+.form-input{width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:var(--rs);font-size:14px;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--white);transition:border-color .15s;outline:none}
+.form-input:focus{border-color:var(--g3)}
+.form-input::placeholder{color:var(--ink4)}
+.form-input.error{border-color:var(--red)}
+.form-hint{font-size:12px;color:var(--ink3);margin-top:4px}
+.form-error{font-size:12px;color:var(--red);margin-top:4px;display:none}
+.form-error.show{display:block}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 24px;border-radius:var(--rs);font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;border:none}
+.btn-primary{background:var(--g2);color:var(--white)}
+.btn-primary:hover{background:var(--g1)}
+.btn-primary:disabled{background:var(--ink4);cursor:not-allowed}
+.btn-outline{background:transparent;color:var(--ink2);border:1.5px solid var(--line)}
+.btn-outline:hover{background:var(--bg);border-color:var(--ink4)}
+.btn-full{width:100%}
+.btn-danger{background:var(--red);color:white}
+.btn-sm{padding:7px 14px;font-size:13px}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--line);margin:1.5rem 0}
+.divider-text{display:flex;align-items:center;gap:12px;margin:1.25rem 0}
+.divider-text::before,.divider-text::after{content:'';flex:1;height:1px;background:var(--line)}
+.divider-text span{font-size:12px;color:var(--ink4)}
+
+/* ── BADGES / CHIPS ── */
+.badge{display:inline-block;font-size:11px;padding:3px 8px;border-radius:12px;font-weight:500}
+.badge-green{background:var(--g5);color:var(--g2)}
+.badge-amber{background:var(--amber2);color:var(--amber)}
+.badge-blue{background:var(--blue2);color:var(--blue)}
+.badge-red{background:var(--red2);color:var(--red)}
+.chip{display:inline-flex;align-items:center;padding:5px 12px;border-radius:20px;font-size:13px;border:1.5px solid var(--line);cursor:pointer;color:var(--ink2);transition:all .15s}
+.chip.on{background:var(--g5);color:var(--g2);border-color:var(--g4)}
+.chip.red.on{background:var(--red2);color:var(--red);border-color:#ef9a9a}
+
+/* ── AUTH SCREENS ── */
+.auth-wrap{min-height:calc(100vh - 60px);display:flex;align-items:center;justify-content:center;padding:2rem}
+.auth-card{width:100%;max-width:440px;background:var(--white);border-radius:20px;border:1px solid var(--line);overflow:hidden;box-shadow:var(--sh2)}
+.auth-hero{background:var(--g1);padding:2rem;text-align:center}
+.auth-logo{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.15);margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:26px}
+.auth-title{font-family:'Playfair Display',serif;font-size:24px;color:white;margin-bottom:4px}
+.auth-sub{font-size:13px;color:rgba(255,255,255,.65)}
+.auth-body{padding:2rem}
+.auth-footer{text-align:center;margin-top:1rem;font-size:13px;color:var(--ink3)}
+
+/* ── STEP INDICATOR ── */
+.steps{display:flex;justify-content:center;gap:8px;margin-bottom:1.5rem}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:all .3s}
+.step-dot.on{background:var(--g3);width:24px;border-radius:4px}
+.step-dot.done{background:var(--g4)}
+
+/* ── CREDIT CARD VISUAL ── */
+.cc-visual{background:linear-gradient(135deg,#1a3a1a 0%,#2d5a2d 60%,#4a8c3f 100%);border-radius:16px;padding:1.5rem;color:white;margin-bottom:1.5rem;position:relative;overflow:hidden;aspect-ratio:1.586}
+.cc-visual::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.05)}
+.cc-visual::after{content:'';position:absolute;bottom:-60px;left:-20px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)}
+.cc-chip{width:36px;height:26px;border-radius:4px;background:rgba(255,215,0,.7);margin-bottom:1.25rem;position:relative;z-index:1}
+.cc-number{font-size:17px;letter-spacing:.18em;font-weight:300;margin-bottom:1rem;position:relative;z-index:1;font-family:'DM Sans',monospace}
+.cc-bottom{display:flex;justify-content:space-between;align-items:flex-end;position:relative;z-index:1}
+.cc-label{font-size:9px;opacity:.65;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+.cc-value{font-size:13px;font-weight:400}
+.cc-brand{font-size:22px;opacity:.9}
+
+/* ── PLAN CARDS ── */
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+.plan-card{border:1.5px solid var(--line);border-radius:var(--r);padding:1.25rem;cursor:pointer;transition:all .2s;position:relative}
+.plan-card:hover{border-color:var(--g4)}
+.plan-card.selected{border-color:var(--g3);background:var(--g6)}
+.plan-card.selected::after{content:'✓';position:absolute;top:10px;right:12px;width:20px;height:20px;border-radius:50%;background:var(--g3);color:white;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.plan-popular{font-size:11px;background:var(--g3);color:white;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:.5rem;font-weight:500}
+.plan-name{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:.25rem}
+.plan-price{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--g2);line-height:1}
+.plan-per{font-size:12px;color:var(--ink3)}
+.plan-features{margin-top:.75rem;display:flex;flex-direction:column;gap:5px}
+.plan-feat{font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.plan-feat::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--g3);flex-shrink:0}
+.mp-strip{background:var(--bg);border-radius:var(--rs);padding:.75rem;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line)}
+.mp-logo{font-size:14px;font-weight:700;color:#00b1ea;letter-spacing:-.3px}
+
+/* ── WEEK PLANNER ── */
+.week-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.week-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700}
+.week-stats{display:flex;gap:8px}
+.stat-pill{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:5px 14px;font-size:13px;color:var(--ink2)}
+.stat-pill strong{color:var(--g2);font-weight:500}
+
+.cal-toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.toggle{position:relative;width:40px;height:22px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;background:var(--line);border-radius:22px;transition:.2s}
+.toggle-thumb{position:absolute;height:16px;width:16px;left:3px;top:3px;background:white;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle input:checked~.toggle-track{background:var(--g3)}
+.toggle input:checked~.toggle-thumb{transform:translateX(18px)}
+
+.day-block{background:var(--white);border-radius:var(--r);border:1px solid var(--line);overflow:hidden;margin-bottom:.75rem;transition:box-shadow .15s}
+.day-block:hover{box-shadow:var(--sh)}
+.day-head{background:var(--g6);padding:.6rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--g5)}
+.day-name{font-size:14px;font-weight:500;color:var(--g1)}
+.day-kcal{font-size:12px;color:var(--g3);font-weight:500}
+.meal-row{display:flex;align-items:center;padding:.75rem 1.25rem;gap:12px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .12s}
+.meal-row:last-child{border-bottom:none}
+.meal-row:hover{background:var(--bg)}
+.meal-type{font-size:11px;font-weight:500;color:var(--ink4);width:72px;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em}
+.meal-thumb{width:44px;height:44px;border-radius:10px;object-fit:cover;background:var(--g5);flex-shrink:0}
+.meal-ph{width:44px;height:44px;border-radius:10px;background:var(--g5);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.meal-info{flex:1;min-width:0}
+.meal-name{font-size:14px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meal-kcal-txt{font-size:12px;color:var(--ink3);margin-top:2px}
+.meal-empty{font-size:14px;color:var(--ink4);font-style:italic;flex:1}
+.meal-actions{display:flex;gap:6px;flex-shrink:0}
+.meal-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:opacity .15s}
+.meal-btn:hover{opacity:.75}
+.meal-btn-add{background:var(--g5);color:var(--g2);font-size:20px;border-radius:50%}
+.meal-btn-del{background:var(--red2);color:var(--red)}
+.meal-btn-eye{background:var(--blue2);color:var(--blue)}
+
+/* ── COMPRAS ── */
+.buy-hero{background:var(--g1);border-radius:var(--r);padding:1.5rem 2rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between}
+.buy-hero-title{font-family:'Playfair Display',serif;font-size:22px;color:white;margin-bottom:4px}
+.buy-hero-sub{font-size:13px;color:rgba(255,255,255,.65)}
+.buy-count{font-family:'Playfair Display',serif;font-size:52px;font-weight:700;color:rgba(255,255,255,.8);line-height:1}
+.ingr-list{background:var(--white);border-radius:var(--r);border:1px solid var(--line);overflow:hidden}
+.ingr-cat-header{background:var(--bg);padding:.5rem 1.25rem;font-size:11px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--line)}
+.ingr-item{display:flex;align-items:center;padding:.65rem 1.25rem;gap:12px;border-bottom:1px solid var(--line)}
+.ingr-item:last-child{border-bottom:none}
+.ingr-chk{width:20px;height:20px;border-radius:6px;border:2px solid var(--line);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ingr-chk.done{background:var(--g3);border-color:var(--g3)}
+.ingr-chk.done::after{content:'✓';color:white;font-size:11px;font-weight:700}
+.ingr-name{font-size:14px;flex:1;color:var(--ink)}
+.ingr-name.done{text-decoration:line-through;color:var(--ink4)}
+.ingr-qty{font-size:13px;color:var(--ink3);font-weight:500;white-space:nowrap}
+
+/* ── PROMOS ── */
+.promo-hero{background:linear-gradient(135deg,#0d2b7a,#1565c0);border-radius:var(--r);padding:1.5rem 2rem;margin-bottom:1.25rem;color:white}
+.promo-hero-title{font-family:'Playfair Display',serif;font-size:22px;color:white;margin-bottom:4px}
+.promo-hero-sub{font-size:13px;color:rgba(255,255,255,.7)}
+.bank-filter-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:1rem;scrollbar-width:none}
+.bank-filter-row::-webkit-scrollbar{display:none}
+.bchip{padding:6px 14px;border-radius:20px;font-size:13px;white-space:nowrap;cursor:pointer;border:1.5px solid var(--line);color:var(--ink2);background:var(--white);transition:all .15s;font-weight:500}
+.bchip.on{border-color:#1976d2;background:var(--blue2);color:var(--blue)}
+.super-card{background:var(--white);border-radius:var(--r);border:1px solid var(--line);overflow:hidden;margin-bottom:.75rem}
+.super-head{display:flex;align-items:center;gap:12px;padding:1rem 1.25rem;border-bottom:1px solid var(--line)}
+.store-logo{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:white;flex-shrink:0}
+.store-nm{font-size:15px;font-weight:500;color:var(--ink)}
+.store-addr{font-size:12px;color:var(--ink3)}
+.promo-item{display:flex;align-items:center;padding:.7rem 1.25rem;gap:10px;border-bottom:1px solid var(--line)}
+.promo-item:last-child{border-bottom:none}
+.promo-bank{font-size:11px;font-weight:500;background:var(--blue2);color:var(--blue);padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0}
+.promo-txt{font-size:13px;flex:1;color:var(--ink)}
+.promo-detail{font-size:12px;color:var(--ink3);margin-top:1px}
+.promo-disc{font-size:14px;font-weight:700;color:var(--red);white-space:nowrap;flex-shrink:0}
+.promo-days{font-size:11px;color:var(--ink3)}
+
+/* ── PERFIL ── */
+.profile-hero{background:var(--g1);border-radius:var(--r);padding:1.5rem 2rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:16px}
+.profile-avatar-big{width:64px;height:64px;border-radius:50%;background:var(--g4);display:flex;align-items:center;justify-content:center;font-size:28px;border:3px solid rgba(255,255,255,.2);flex-shrink:0}
+.profile-hero-name{font-family:'Playfair Display',serif;font-size:22px;color:white;margin-bottom:4px}
+.profile-hero-city{font-size:13px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:5px}
+.profile-pct{margin-top:6px}
+.profile-pct-bar{background:rgba(255,255,255,.2);border-radius:4px;height:4px;width:120px}
+.profile-pct-fill{background:#7ec870;border-radius:4px;height:4px;transition:width .5s}
+.profile-pct-txt{font-size:11px;color:rgba(255,255,255,.6);margin-top:3px}
+.subs-status{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-radius:var(--rs);padding:.75rem 1rem;border:1px solid var(--line);margin-bottom:.75rem}
+.subs-status-left{display:flex;align-items:center;gap:8px}
+.subs-dot{width:8px;height:8px;border-radius:50%;background:var(--g3);flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.subs-label{font-size:14px;font-weight:500;color:var(--ink)}
+.subs-sub{font-size:12px;color:var(--ink3);margin-top:1px}
+.chips-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:.5rem}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:flex-end;justify-content:center;padding:0}
+.modal-overlay.on{display:flex;animation:ovIn .2s}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.modal-sheet{background:var(--white);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;padding:1.5rem;animation:sheetUp .25s ease}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:44px;height:4px;background:var(--line);border-radius:2px;margin:0 auto 1.25rem}
+.modal-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:1.25rem}
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:1rem}
+.pick-card{border:2px solid var(--line);border-radius:var(--rs);overflow:hidden;cursor:pointer;transition:all .15s}
+.pick-card:hover{border-color:var(--g3)}
+.pick-card.on{border-color:var(--g2);background:var(--g6)}
+.pick-thumb{width:100%;height:90px;object-fit:cover;background:var(--g5)}
+.pick-ph{width:100%;height:90px;background:var(--g5);display:flex;align-items:center;justify-content:center;font-size:32px}
+.pick-name{font-size:13px;font-weight:500;padding:7px 9px;color:var(--ink);line-height:1.3}
+.pick-kcal{font-size:12px;color:var(--ink3);padding:0 9px 7px}
+
+/* Detail modal */
+.detail-img{width:100%;height:200px;object-fit:cover;border-radius:var(--rs);margin-bottom:1rem;background:var(--g5);display:block}
+.detail-ph{width:100%;height:180px;background:var(--g5);border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:56px;margin-bottom:1rem}
+.step-item{display:flex;gap:12px;margin-bottom:1rem}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--g1);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;margin-top:1px}
+.step-txt{font-size:14px;color:var(--ink2);line-height:1.6;flex:1}
+.yt-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:#ff0000;color:white;border-radius:var(--rs);padding:10px 20px;font-size:14px;font-weight:500;text-decoration:none;margin-bottom:1rem;cursor:pointer}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:white;padding:12px 24px;border-radius:24px;font-size:13px;font-weight:500;z-index:999;opacity:0;pointer-events:none;transition:all .3s;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:3rem 1rem}
+.empty-icon{font-size:52px;margin-bottom:.75rem}
+.empty-txt{font-size:16px;color:var(--ink3);line-height:1.6}
+
+/* ── SECTION HEADER ── */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.sec-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700}
+.sec-sub{font-size:13px;color:var(--ink3);margin-top:2px}
+
+/* LOADING SPINNER */
+.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── WHATSAPP NOTIF PREVIEW ── */
+.wa-phone{background:#e5ddd5;border-radius:16px;overflow:hidden;max-width:340px;margin:0 auto}
+.wa-header{background:#075e54;padding:.75rem 1rem;display:flex;align-items:center;gap:10px}
+.wa-avatar{width:36px;height:36px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:16px}
+.wa-name{font-size:14px;font-weight:500;color:white}
+.wa-status{font-size:11px;color:rgba(255,255,255,.7)}
+.wa-body{padding:1rem}
+.wa-bubble{background:white;border-radius:0 12px 12px 12px;padding:.75rem 1rem;font-size:13px;line-height:1.6;color:#111;max-width:280px;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.wa-bubble strong{color:#075e54}
+.wa-time{font-size:10px;color:#999;text-align:right;margin-top:4px}
+.wa-tick{font-size:11px;color:#34b7f1}
+
+/* ── BOTTOM NAV (mobile only) ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--line);display:flex;z-index:50;padding:6px 0 max(6px,env(safe-area-inset-bottom));box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 0;color:var(--ink4);transition:color .15s;-webkit-tap-highlight-color:transparent}
+.bnav-item.on{color:var(--g2)}
+.bnav-icon{font-size:20px;line-height:1}
+.bnav-lbl{font-size:10px;font-weight:600;letter-spacing:.01em}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — TABLET (≤768px)
+══════════════════════════════════════ */
+@media(max-width:768px){
+  .page{padding:1.25rem 1rem 5rem}
+  .topnav-inner{padding:.6rem 1rem;gap:8px}
+  .nav-brand-sub{display:none}
+  .nav-plan-badge{display:none}
+  .nav-links{gap:2px}
+  .nav-link{font-size:12px;padding:5px 9px}
+
+  /* Auth */
+  .auth-wrap{padding:1rem;align-items:flex-start;padding-top:1.5rem}
+  .auth-card{border-radius:16px}
+  .auth-hero{padding:1.5rem 1.5rem 1rem}
+  .auth-title{font-size:20px}
+  .auth-body{padding:1.25rem}
+
+  /* Plan cards — stack on tablet */
+  .plan-grid{grid-template-columns:1fr}
+
+  /* Week */
+  .week-header{flex-direction:column;align-items:flex-start;gap:.5rem}
+  .week-stats{flex-wrap:wrap;gap:6px}
+  .meal-row{padding:.6rem 1rem;gap:8px}
+  .meal-type{width:58px;font-size:10px}
+  .meal-thumb,.meal-ph{width:38px;height:38px}
+  .meal-name{font-size:13px}
+
+  /* Compras */
+  .buy-hero{padding:1.1rem 1.25rem}
+  .buy-hero-title{font-size:18px}
+  .buy-count{font-size:42px}
+
+  /* Promos */
+  .promo-hero{padding:1.1rem 1.25rem}
+  .promo-hero-title{font-size:18px}
+  .promo-item{flex-wrap:wrap;gap:6px}
+
+  /* Perfil */
+  .profile-hero{padding:1.1rem 1.25rem;gap:12px}
+  .profile-avatar-big{width:52px;height:52px;font-size:22px}
+  .profile-hero-name{font-size:18px}
+
+  /* Modal */
+  .pick-grid{grid-template-columns:1fr 1fr}
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — MOBILE (≤480px)
+══════════════════════════════════════ */
+@media(max-width:480px){
+  body{font-size:14px}
+  .page{padding:1rem .875rem 5rem}
+
+  /* Nav — icono + avatar solo, links abajo */
+  .topnav-inner{flex-wrap:wrap;padding:.6rem .875rem;gap:0}
+  .nav-brand{flex:1}
+  .nav-brand-name{font-size:16px}
+  .nav-links{order:3;width:100%;justify-content:space-around;background:rgba(0,0,0,.15);margin:.4rem -.875rem 0;padding:.4rem .875rem;border-top:1px solid rgba(255,255,255,.08)}
+  .nav-link{font-size:11px;padding:4px 8px;border-radius:14px}
+  .nav-user{gap:6px}
+
+  /* Auth */
+  .auth-wrap{padding:.75rem;padding-top:1rem}
+  .auth-card{border-radius:12px}
+  .auth-hero{padding:1.25rem 1rem .75rem}
+  .auth-logo{width:44px;height:44px;font-size:22px}
+  .auth-title{font-size:18px}
+  .auth-body{padding:1rem}
+  .form-row{grid-template-columns:1fr}
+  .form-group{margin-bottom:1rem}
+
+  /* CC card */
+  .cc-visual{padding:1.25rem}
+  .cc-number{font-size:15px;letter-spacing:.12em}
+  .cc-value{font-size:12px}
+
+  /* Steps */
+  .steps{gap:6px}
+
+  /* Plan */
+  .plan-grid{grid-template-columns:1fr}
+  .plan-price{font-size:24px}
+
+  /* Week */
+  .week-header{gap:.35rem}
+  .week-title{font-size:20px}
+  .stat-pill{font-size:12px;padding:4px 10px}
+  .day-head{padding:.5rem .875rem}
+  .day-name{font-size:13px}
+  .meal-row{padding:.55rem .875rem;gap:7px}
+  .meal-type{width:52px;font-size:10px}
+  .meal-thumb,.meal-ph{width:34px;height:34px;border-radius:7px;font-size:16px}
+  .meal-name{font-size:12px}
+  .meal-btn{width:26px;height:26px;font-size:12px}
+
+  /* Compras */
+  .buy-hero{border-radius:var(--rs);padding:1rem}
+  .buy-hero-title{font-size:16px}
+  .buy-count{font-size:36px}
+  .ingr-item{padding:.55rem .875rem;gap:8px}
+  .ingr-name{font-size:13px}
+  .ingr-qty{font-size:12px}
+
+  /* Promos */
+  .promo-hero{border-radius:var(--rs);padding:1rem}
+  .promo-hero-title{font-size:16px}
+  .bank-filter-row{gap:6px}
+  .bchip{font-size:12px;padding:5px 10px}
+  .super-head{padding:.75rem .875rem;gap:8px}
+  .store-logo{width:36px;height:36px;font-size:10px}
+  .promo-item{padding:.55rem .875rem;flex-wrap:wrap;gap:5px}
+  .promo-txt{font-size:12px}
+
+  /* Perfil */
+  .profile-hero{border-radius:var(--rs);padding:1rem;gap:10px}
+  .profile-avatar-big{width:46px;height:46px;font-size:20px}
+  .profile-hero-name{font-size:16px}
+  .profile-hero-city{font-size:11px}
+  .card{padding:1rem .875rem}
+  .subs-status{padding:.65rem .875rem}
+  .chips-row{gap:6px}
+  .chip{font-size:12px;padding:4px 10px}
+
+  /* Modal sheet */
+  .modal-sheet{padding:1.25rem .875rem 1.5rem}
+  .modal-title{font-size:19px}
+  .pick-grid{grid-template-columns:1fr 1fr;gap:7px}
+  .pick-thumb,.pick-ph{height:75px}
+  .pick-name{font-size:12px;padding:5px 7px}
+
+  /* Detail */
+  .detail-img,.detail-ph{height:160px}
+  .step-item{gap:10px}
+  .step-num{width:24px;height:24px;font-size:11px}
+  .step-txt{font-size:13px}
+
+  /* Toast — full width on mobile */
+  .toast{left:1rem;right:1rem;transform:translateY(10px);text-align:center;white-space:normal}
+  .toast.on{transform:translateY(0)}
+
+  /* WA */
+  .wa-phone{border-radius:12px}
+  .wa-bubble{font-size:12px}
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — DESKTOP WIDE (≥1200px)
+══════════════════════════════════════ */
+@media(min-width:1200px){
+  .page{max-width:1100px}
+  .week-body-inner{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+  .day-block{margin-bottom:0}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav" id="topnav" style="display:none">
+  <div class="topnav-inner">
+    <div class="nav-brand">
+      <div class="nav-brand-icon">🍳</div>
+      <div>
+        <div class="nav-brand-name">Tali Cocina</div>
+        <div class="nav-brand-sub">@talicocina</div>
+      </div>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <div class="nav-link active" onclick="showScreen('semana',this)">Semana</div>
+      <div class="nav-link" onclick="showScreen('compras',this)">Compras</div>
+      <div class="nav-link" onclick="showScreen('promos',this)">Promos</div>
+      <div class="nav-link" onclick="showScreen('perfil',this)">Perfil</div>
+    </div>
+    <div class="nav-user">
+      <span class="nav-plan-badge" id="nav-plan-badge">Mensual</span>
+      <div class="nav-avatar" id="nav-avatar" onclick="showScreen('perfil')">TC</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ SCREEN: LOGIN ══ -->
+<div class="screen on" id="screen-login">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-hero">
+        <div class="auth-logo">🍳</div>
+        <div class="auth-title">Tali Cocina</div>
+        <div class="auth-sub">Tu menú semanal personalizado</div>
+      </div>
+      <div class="auth-body">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="login-email" type="email" placeholder="tu@email.com" value="usuario@demo.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input class="form-input" id="login-pass" type="password" placeholder="••••••••" value="demo1234">
+          <div class="form-error" id="login-error">Email o contraseña incorrectos.</div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="doLogin()" id="login-btn">Ingresar</button>
+        <div class="divider-text"><span>o</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
+          <button class="btn btn-outline" onclick="doLogin()">G Google</button>
+          <button class="btn btn-outline" onclick="doLogin()">f Facebook</button>
+        </div>
+        <div class="auth-footer">¿No tenés cuenta? <a href="#" onclick="showScreen('register')">Registrarse</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: REGISTER ══ -->
+<div class="screen" id="screen-register">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-hero">
+        <div class="auth-logo">🍳</div>
+        <div class="auth-title">Crear cuenta</div>
+        <div class="auth-sub">Comenzá tu semana con las mejores recetas</div>
+      </div>
+      <div class="auth-body">
+        <div class="steps" id="reg-steps">
+          <div class="step-dot on"></div>
+          <div class="step-dot"></div>
+          <div class="step-dot"></div>
+        </div>
+
+        <!-- Step 1: Datos personales -->
+        <div id="reg-step-1">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Nombre</label>
+              <input class="form-input" id="reg-name" placeholder="Tu nombre">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Apellido</label>
+              <input class="form-input" id="reg-apellido" placeholder="Tu apellido">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" id="reg-email" type="email" placeholder="tu@email.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <input class="form-input" id="reg-pass" type="password" placeholder="Mínimo 8 caracteres">
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp</label>
+            <input class="form-input" id="reg-wapp" type="tel" placeholder="+54 9 223 000-0000">
+            <div class="form-hint">Para recibir las recetas semanales</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ciudad</label>
+            <input class="form-input" id="reg-city" placeholder="Ej: Mar del Plata">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="regStep(2)">Continuar →</button>
+        </div>
+
+        <!-- Step 2: Plan -->
+        <div id="reg-step-2" style="display:none">
+          <p style="font-size:14px;color:var(--ink2);margin-bottom:1rem;line-height:1.6">Elegí el plan que más te conviene. Podés cancelar cuando quieras.</p>
+          <div class="plan-grid">
+            <div class="plan-card selected" id="plan-mensual" onclick="selectPlan('mensual')">
+              <div class="plan-popular">+ popular</div>
+              <div class="plan-name">Mensual</div>
+              <div class="plan-price">$1.990</div>
+              <div class="plan-per">por mes</div>
+              <div class="plan-features">
+                <div class="plan-feat">Todas las recetas</div>
+                <div class="plan-feat">Menú personalizado</div>
+                <div class="plan-feat">Lista de compras</div>
+                <div class="plan-feat">Promos bancarias</div>
+              </div>
+            </div>
+            <div class="plan-card" id="plan-anual" onclick="selectPlan('anual')">
+              <div class="plan-name">Anual</div>
+              <div class="plan-price">$16.900</div>
+              <div class="plan-per">por año · 2 meses gratis</div>
+              <div class="plan-features">
+                <div class="plan-feat">Todo lo del mensual</div>
+                <div class="plan-feat">2 meses gratis</div>
+                <div class="plan-feat">Prioridad en soporte</div>
+              </div>
+            </div>
+          </div>
+          <div class="mp-strip">
+            <span style="font-size:13px;color:var(--ink3)">Pagos seguros con</span>
+            <span class="mp-logo">MercadoPago</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1rem">
+            <button class="btn btn-outline" onclick="regStep(1)">← Atrás</button>
+            <button class="btn btn-primary" onclick="regStep(3)">Continuar →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Tarjeta -->
+        <div id="reg-step-3" style="display:none">
+          <div class="cc-visual" id="cc-visual">
+            <div class="cc-chip"></div>
+            <div class="cc-number" id="cc-display">•••• •••• •••• ••••</div>
+            <div class="cc-bottom">
+              <div>
+                <div class="cc-label">Titular</div>
+                <div class="cc-value" id="cc-name-display">NOMBRE APELLIDO</div>
+              </div>
+              <div>
+                <div class="cc-label">Vence</div>
+                <div class="cc-value" id="cc-exp-display">MM/AA</div>
+              </div>
+              <div class="cc-brand" id="cc-brand">💳</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Número de tarjeta</label>
+            <input class="form-input" id="cc-number" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCC(this)" inputmode="numeric">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nombre en la tarjeta</label>
+            <input class="form-input" id="cc-name" placeholder="Como aparece en la tarjeta" oninput="document.getElementById('cc-name-display').textContent=this.value.toUpperCase()||'NOMBRE APELLIDO'">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Vencimiento</label>
+              <input class="form-input" id="cc-exp" placeholder="MM/AA" maxlength="5" oninput="formatExp(this)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CVV</label>
+              <input class="form-input" id="cc-cvv" placeholder="•••" maxlength="4" type="password" inputmode="numeric">
+            </div>
+          </div>
+          <div style="background:var(--g6);border-radius:var(--rx);padding:.75rem 1rem;margin-bottom:1rem;font-size:12px;color:var(--ink3);display:flex;gap:6px">
+            <span>🔒</span>
+            <span>Tus datos están protegidos. Esta es una simulación — no se cobra nada real.</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button class="btn btn-outline" onclick="regStep(2)">← Atrás</button>
+            <button class="btn btn-primary" id="pay-btn" onclick="doPayment()">
+              <span id="pay-btn-txt">Confirmar suscripción</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="auth-footer" style="margin-top:.75rem">¿Ya tenés cuenta? <a href="#" onclick="showScreen('login')">Ingresar</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: SEMANA ══ -->
+<div class="screen" id="screen-semana">
+  <div class="page">
+    <div class="week-header">
+      <div>
+        <div class="week-title">Menú de la semana</div>
+        <div style="font-size:13px;color:var(--ink3);margin-top:3px" id="week-date-label">Semana del — al —</div>
+      </div>
+      <div class="week-stats">
+        <div class="stat-pill"><strong id="stat-count">0</strong> recetas</div>
+        <div class="stat-pill" id="stat-cals-pill" style="display:none"><strong id="stat-cals">0</strong> kcal</div>
+      </div>
+    </div>
+    <label class="cal-toggle-row">
+      <label class="toggle">
+        <input type="checkbox" id="cal-toggle" onchange="toggleCals(this.checked)">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+      <span style="font-size:13px;color:var(--ink2)">Mostrar calorías</span>
+    </label>
+    <div id="week-body"></div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: COMPRAS ══ -->
+<div class="screen" id="screen-compras">
+  <div class="page">
+    <div class="buy-hero">
+      <div>
+        <div class="buy-hero-title">Lista de compras</div>
+        <div class="buy-hero-sub" id="buy-sub-txt">Basada en tu menú semanal</div>
+      </div>
+      <div class="buy-count" id="buy-count">0</div>
+    </div>
+    <div id="buy-body"></div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: PROMOS ══ -->
+<div class="screen" id="screen-promos">
+  <div class="page">
+    <div class="promo-hero">
+      <div class="promo-hero-title">🏦 Promociones bancarias</div>
+      <div class="promo-hero-sub" id="promo-city-lbl">Cargando tu ubicación…</div>
+    </div>
+    <div class="bank-filter-row" id="bank-filter"></div>
+    <div id="promos-body"></div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: PERFIL ══ -->
+<div class="screen" id="screen-perfil">
+  <div class="page" style="max-width:680px">
+    <div class="profile-hero">
+      <div class="profile-avatar-big" id="profile-avatar">👤</div>
+      <div>
+        <div class="profile-hero-name" id="profile-hero-name">Tu perfil</div>
+        <div class="profile-hero-city" id="profile-hero-city">📍 Sin ciudad</div>
+        <div class="profile-pct">
+          <div class="profile-pct-bar"><div class="profile-pct-fill" id="pct-fill" style="width:0%"></div></div>
+          <div class="profile-pct-txt" id="pct-txt">0% completado</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suscripción -->
+    <div class="subs-status">
+      <div class="subs-status-left">
+        <div class="subs-dot"></div>
+        <div>
+          <div class="subs-label" id="subs-label">Plan Mensual activo</div>
+          <div class="subs-sub" id="subs-sub">Próximo vencimiento: —</div>
+        </div>
+      </div>
+      <span class="badge badge-green" id="subs-badge">Activo</span>
+    </div>
+
+    <div class="card">
+      <div style="font-size:16px;font-weight:500;margin-bottom:1rem;color:var(--ink)">Datos personales</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="pf-name" placeholder="Tu nombre" oninput="updateProfileHero()"></div>
+        <div class="form-group"><label class="form-label">Apellido</label><input class="form-input" id="pf-apellido" placeholder="Tu apellido"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="pf-email" type="email" placeholder="tu@email.com"></div>
+      <div class="form-group"><label class="form-label">WhatsApp</label><input class="form-input" id="pf-wapp" type="tel" placeholder="+54 9 223 000-0000"><div class="form-hint">Para recibir las recetas semanales</div></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Ciudad</label><input class="form-input" id="pf-city" placeholder="Ej: Mar del Plata" oninput="updateProfileHero()"></div>
+        <div class="form-group"><label class="form-label">Personas en el hogar</label>
+          <select class="form-input" id="pf-personas">
+            <option value="1">1 persona</option><option value="2" selected>2 personas</option>
+            <option value="3">3 personas</option><option value="4">4 personas</option><option value="5">5 o más</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Banco principal</label>
+        <select class="form-input" id="pf-banco">
+          <option value="">Sin preferencia</option>
+          <option>Banco Nación</option><option>Banco Provincia</option><option>Santander</option>
+          <option>BBVA</option><option>HSBC</option><option>Galicia</option><option>Macro</option>
+          <option>ICBC</option><option>Patagonia</option><option>Naranja X</option>
+          <option>Mercado Pago</option><option>MODO</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:16px;font-weight:500;margin-bottom:.75rem;color:var(--ink)">Alergias / Restricciones</div>
+      <div class="chips-row" id="alergias-chips">
+        <div class="chip red" onclick="togChip(this)">Gluten</div>
+        <div class="chip red" onclick="togChip(this)">Lactosa</div>
+        <div class="chip red" onclick="togChip(this)">Maní</div>
+        <div class="chip red" onclick="togChip(this)">Mariscos</div>
+        <div class="chip red" onclick="togChip(this)">Frutos secos</div>
+        <div class="chip red" onclick="togChip(this)">Huevo</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:16px;font-weight:500;margin-bottom:.75rem;color:var(--ink)">Preferencias alimentarias</div>
+      <div class="chips-row" id="pref-chips">
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Omnívoro</div>
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Vegetariano</div>
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Vegano</div>
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Low carb</div>
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Sin azúcar</div>
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Alta proteína</div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveProfile()" style="margin-bottom:.75rem">Guardar cambios</button>
+    <button class="btn btn-outline btn-full" onclick="doLogout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="mo-pick" onclick="closeMo('mo-pick',event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mo-pick-title">Elegir receta</div>
+    <div class="pick-grid" id="mo-pick-grid"></div>
+    <button class="btn btn-outline btn-full" onclick="closeMo('mo-pick')">Cancelar</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="mo-detail" onclick="closeMo('mo-detail',event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div id="mo-detail-body"></div>
+    <button class="btn btn-outline btn-full" onclick="closeMo('mo-detail')">Cerrar</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="mo-payment-success" onclick="closeMo('mo-payment-success',event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()" style="text-align:center;padding:2rem">
+    <div style="font-size:56px;margin-bottom:1rem">🎉</div>
+    <div class="modal-title" style="text-align:center">¡Bienvenida a Tali Cocina!</div>
+    <p style="font-size:14px;color:var(--ink2);margin-bottom:1.5rem;line-height:1.7">Tu suscripción está activa. Ya podés armar tu menú semanal y recibir las recetas por WhatsApp.</p>
+    <div style="margin-bottom:1.5rem" id="wa-preview-success"></div>
+    <button class="btn btn-primary btn-full" onclick="closeMo('mo-payment-success');enterApp()">¡Empezar a planificar!</button>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV (visible ≤600px) -->
+<nav class="bottom-nav" id="bottom-nav" style="display:none">
+  <div class="bnav-item on" id="bn-semana" onclick="showScreen('semana');setBottomNav('bn-semana')">
+    <div class="bnav-icon">📅</div><div class="bnav-lbl">Semana</div>
+  </div>
+  <div class="bnav-item" id="bn-compras" onclick="showScreen('compras');setBottomNav('bn-compras')">
+    <div class="bnav-icon">🛒</div><div class="bnav-lbl">Compras</div>
+  </div>
+  <div class="bnav-item" id="bn-promos" onclick="showScreen('promos');setBottomNav('bn-promos')">
+    <div class="bnav-icon">🏦</div><div class="bnav-lbl">Promos</div>
+  </div>
+  <div class="bnav-item" id="bn-perfil" onclick="showScreen('perfil');setBottomNav('bn-perfil')">
+    <div class="bnav-icon">👤</div><div class="bnav-lbl">Perfil</div>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const DAYS  = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+const MEALS = ['Almuerzo','Cena'];
+const STORES = {
+  coto:{name:'COTO',color:'#e31e24'},toledo:{name:'Toledo',color:'#1a5ca8'},
+  disco:{name:'Disco',color:'#e65100'},vital:{name:'Vital',color:'#2e7d2e'},
+  changomas:{name:'Changomás',color:'#6a1b9a'},'la-anonima':{name:'La Anónima',color:'#c8960c'},
+  carrefour:{name:'Carrefour',color:'#004a97'},dia:{name:'Día%',color:'#cc0000'}
+};
+
+let recipes  = JSON.parse(localStorage.getItem('tc_recipes')||'null');
+let promos   = JSON.parse(localStorage.getItem('tc_promos') ||'null');
+let plan     = JSON.parse(localStorage.getItem('tc_plan')   ||'{}');
+let checked  = JSON.parse(localStorage.getItem('tc_chk')    ||'{}');
+let profile  = JSON.parse(localStorage.getItem('tc_profile')||'{}');
+let currentUser = JSON.parse(localStorage.getItem('tc_user')||'null');
+let showCals = false;
+let selectedPlan = 'mensual';
+let editKey = null;
+let bankFilter = '';
+
+if(!recipes) initDemoRecipes();
+if(!promos)  initDemoPromos();
+
+function initDemoRecipes(){
+  recipes=[
+    {id:'r1',name:'Milanesas napolitanas',ytUrl:'',ytId:'',cals:540,porciones:2,
+     ingredientes:[{n:'Carne milanesa',c:'500',u:'g'},{n:'Huevos',c:'2',u:'unidades'},{n:'Pan rallado',c:'100',u:'g'},{n:'Tomate',c:'2',u:'unidades'},{n:'Mozzarella',c:'200',u:'g'},{n:'Jamón cocido',c:'100',u:'g'}],
+     pasos:['Batir los huevos en un plato hondo.','Pasar la carne por huevo y luego por pan rallado.','Freír en aceite caliente hasta dorar.','Colocar en fuente con tomate, jamón y mozzarella encima.','Gratinar a 200°C por 10 minutos.']},
+    {id:'r2',name:'Fideos al tuco casero',ytUrl:'',ytId:'',cals:480,porciones:4,
+     ingredientes:[{n:'Fideos',c:'400',u:'g'},{n:'Carne picada',c:'300',u:'g'},{n:'Tomate triturado',c:'400',u:'g'},{n:'Cebolla',c:'1',u:'unidades'},{n:'Ajo',c:'2',u:'dientes'}],
+     pasos:['Rehogar cebolla y ajo en aceite.','Agregar carne picada y cocinar 5 min.','Incorporar tomate y cocinar 20 min a fuego bajo.','Hervir fideos según el paquete.','Servir con el tuco.']},
+    {id:'r3',name:'Pollo al limón y romero',ytUrl:'',ytId:'',cals:380,porciones:2,
+     ingredientes:[{n:'Pollo (muslos)',c:'600',u:'g'},{n:'Limón',c:'1',u:'unidades'},{n:'Ajo',c:'3',u:'dientes'},{n:'Papa',c:'4',u:'unidades'}],
+     pasos:['Marinar pollo con limón, ajo y romero 30 min.','Colocar en asadera con papas.','Hornear a 200°C por 45 min.']},
+    {id:'r4',name:'Revuelto gramajo',ytUrl:'',ytId:'',cals:360,porciones:2,
+     ingredientes:[{n:'Huevos',c:'4',u:'unidades'},{n:'Papas fritas finas',c:'200',u:'g'},{n:'Jamón cocido',c:'150',u:'g'}],
+     pasos:['Freír papas en tiritas, reservar.','Saltear jamón en tiras.','Agregar huevos batidos y revolver.','Incorporar papas al final.']},
+    {id:'r5',name:'Sopa de verduras',ytUrl:'',ytId:'',cals:180,porciones:4,
+     ingredientes:[{n:'Zanahoria',c:'2',u:'unidades'},{n:'Papa',c:'3',u:'unidades'},{n:'Caldo de verdura',c:'1',u:'litro'},{n:'Apio',c:'2',u:'ramas'}],
+     pasos:['Cortar todas las verduras en cubos.','Llevar a hervor con el caldo.','Cocinar 25 minutos hasta tiernizar.','Salpimentar y servir.']},
+    {id:'r6',name:'Ensalada César',ytUrl:'',ytId:'',cals:280,porciones:2,
+     ingredientes:[{n:'Lechuga',c:'1',u:'unidades'},{n:'Pollo cocido',c:'200',u:'g'},{n:'Pan tostado',c:'2',u:'rebanadas'},{n:'Parmesano',c:'50',u:'g'}],
+     pasos:['Lavar y cortar la lechuga.','Agregar pollo desmenuzado.','Incorporar crutones y parmesano.','Aliñar con aderezo césar.']},
+  ];
+  localStorage.setItem('tc_recipes',JSON.stringify(recipes));
+}
+
+function initDemoPromos(){
+  promos=[
+    {id:'p1',super:'coto',banco:'Banco Nación',desc:'25% OFF con débito',disc:25,dias:'Martes',vigencia:'Hasta 31/05'},
+    {id:'p2',super:'coto',banco:'BBVA',desc:'15% de reintegro tope $2.000',disc:15,dias:'Todos los días',vigencia:'Hasta 30/05'},
+    {id:'p3',super:'toledo',banco:'Santander',desc:'30% OFF en el total de la compra',disc:30,dias:'Jueves',vigencia:'Hasta 15/06'},
+    {id:'p4',super:'toledo',banco:'Galicia',desc:'20% OFF en almacén y carnes',disc:20,dias:'Miércoles',vigencia:'Hasta 31/05'},
+    {id:'p5',super:'disco',banco:'HSBC',desc:'20% de descuento 2do turno',disc:20,dias:'Lun a Vie',vigencia:'Hasta 31/05'},
+    {id:'p6',super:'vital',banco:'Banco Provincia',desc:'25% OFF con débito todos los días',disc:25,dias:'Todos los días',vigencia:'Hasta 30/06'},
+    {id:'p7',super:'changomas',banco:'Mercado Pago',desc:'10% de cashback sin tope',disc:10,dias:'Todos los días',vigencia:'Hasta 30/05'},
+    {id:'p8',super:'la-anonima',banco:'Macro',desc:'20% OFF con crédito los viernes',disc:20,dias:'Viernes',vigencia:'Hasta 30/05'},
+    {id:'p9',super:'carrefour',banco:'MODO',desc:'15% OFF pagando con MODO',disc:15,dias:'Todos los días',vigencia:'Hasta 31/05'},
+  ];
+  localStorage.setItem('tc_promos',JSON.stringify(promos));
+}
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+function doLogin(){
+  const btn=document.getElementById('login-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+  setTimeout(()=>{
+    const email=document.getElementById('login-email').value;
+    const pass=document.getElementById('login-pass').value;
+    if(!email||!pass){ showErr('login-error','Completá todos los campos.'); btn.disabled=false; btn.textContent='Ingresar'; return; }
+    // Simulate login
+    currentUser={name:'María',apellido:'García',email,plan:'mensual',wapp:'+54 9 223 444-5678',city:'Mar del Plata',personas:2,banco:'Santander'};
+    localStorage.setItem('tc_user',JSON.stringify(currentUser));
+    loadProfileIntoForm();
+    enterApp();
+    btn.disabled=false; btn.textContent='Ingresar';
+  },900);
+}
+
+function doLogout(){
+  if(!confirm('¿Cerrar sesión?')) return;
+  currentUser=null;
+  plan={};
+  checked={};
+  localStorage.removeItem('tc_user');
+  localStorage.removeItem('tc_plan');
+  localStorage.removeItem('tc_chk');
+  document.getElementById('topnav').style.display='none';
+  document.getElementById('bottom-nav').style.display='none';
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(i=>i.classList.remove('on'));
+  document.getElementById('login-email').value='';
+  document.getElementById('login-pass').value='';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('screen-login').classList.add('on');
+  toast('Sesión cerrada');
+}
+
+function showErr(id,msg){ const el=document.getElementById(id); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
+
+function regStep(n){
+  [1,2,3].forEach(i=>{
+    document.getElementById('reg-step-'+i).style.display=i===n?'block':'none';
+  });
+  const dots=document.querySelectorAll('#reg-steps .step-dot');
+  dots.forEach((d,i)=>{ d.classList.remove('on','done'); if(i<n-1)d.classList.add('done'); else if(i===n-1)d.classList.add('on'); });
+}
+
+function selectPlan(p){
+  selectedPlan=p;
+  document.getElementById('plan-mensual').classList.toggle('selected',p==='mensual');
+  document.getElementById('plan-anual').classList.toggle('selected',p==='anual');
+}
+
+// CC formatting
+function formatCC(el){
+  let v=el.value.replace(/\D/g,'').slice(0,16);
+  el.value=v.replace(/(.{4})/g,'$1 ').trim();
+  const display=v.padEnd(16,'•').replace(/(.{4})/g,'$1 ').trim();
+  document.getElementById('cc-display').textContent=display;
+  const brand = v.startsWith('4')?'VISA':v.startsWith('5')?'MC':v.startsWith('3')?'AMEX':'💳';
+  const brands={VISA:'🔵 VISA',MC:'🔴 MC',AMEX:'🟢 AMEX','💳':'💳'};
+  document.getElementById('cc-brand').textContent=brands[brand]||'💳';
+}
+function formatExp(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>=2) v=v.slice(0,2)+'/'+v.slice(2,4);
+  el.value=v;
+  document.getElementById('cc-exp-display').textContent=v||'MM/AA';
+}
+
+function doPayment(){
+  const num=document.getElementById('cc-number').value.replace(/\s/g,'');
+  const name=document.getElementById('cc-name').value.trim();
+  const exp=document.getElementById('cc-exp').value;
+  const cvv=document.getElementById('cc-cvv').value;
+  if(num.length<16||!name||exp.length<5||cvv.length<3){ toast('Completá todos los datos de la tarjeta'); return; }
+  const btn=document.getElementById('pay-btn');
+  btn.disabled=true; document.getElementById('pay-btn-txt').innerHTML='<span class="spinner"></span> Procesando…';
+  setTimeout(()=>{
+    btn.disabled=false; document.getElementById('pay-btn-txt').textContent='Confirmar suscripción';
+    // Save user
+    const regName=document.getElementById('reg-name').value||'Usuario';
+    const regEmail=document.getElementById('reg-email').value||'usuario@demo.com';
+    const regWapp=document.getElementById('reg-wapp').value||'+54 9 223 000-0000';
+    const regCity=document.getElementById('reg-city').value||'Mar del Plata';
+    currentUser={name:regName,apellido:document.getElementById('reg-apellido').value||'',email:regEmail,plan:selectedPlan,wapp:regWapp,city:regCity,personas:2,banco:''};
+    localStorage.setItem('tc_user',JSON.stringify(currentUser));
+    loadProfileIntoForm();
+    // Show WA preview
+    const waMsg=buildWAMessage(currentUser.name);
+    document.getElementById('wa-preview-success').innerHTML=buildWAPreview(waMsg);
+    openMo('mo-payment-success');
+  },2000);
+}
+
+function enterApp(){
+  if(currentUser){
+    document.getElementById('topnav').style.display='block';
+    // Show bottom nav on mobile
+    if(window.innerWidth<=600){
+      document.getElementById('bottom-nav').style.display='flex';
+      document.getElementById('topnav').style.display='none';
+    }
+    document.getElementById('nav-avatar').textContent=(currentUser.name||'U').slice(0,2).toUpperCase();
+    document.getElementById('nav-plan-badge').textContent=selectedPlan==='anual'||currentUser.plan==='anual'?'Anual':'Mensual';
+    updateWeekDateLabel();
+    renderWeek();
+    renderBankFilter();
+    document.getElementById('promo-city-lbl').textContent=`Supermercados en ${currentUser.city||'tu ciudad'} · Esta semana`;
+    showScreen('semana');
+    // Handle resize
+    window.addEventListener('resize',()=>{
+      const isMobile=window.innerWidth<=600;
+      document.getElementById('topnav').style.display=isMobile?'none':'block';
+      document.getElementById('bottom-nav').style.display=isMobile?'flex':'none';
+    },{passive:true});
+  }
+}
+
+function setBottomNav(activeId){
+  document.querySelectorAll('.bnav-item').forEach(i=>i.classList.remove('on'));
+  document.getElementById(activeId)?.classList.add('on');
+}
+
+// ══════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════
+function showScreen(name, tabEl){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('on');
+  if(tabEl) tabEl.classList.add('active');
+  // Sync top nav active state
+  const tabMap={semana:0,compras:1,promos:2,perfil:3};
+  const links=document.querySelectorAll('.nav-link');
+  if(tabMap[name]!==undefined) links[tabMap[name]]?.classList.add('active');
+  if(name==='compras') renderCompras();
+  if(name==='promos') renderPromos();
+  if(name==='perfil') renderPerfil();
+  if(name==='semana') renderWeek();
+}
+
+// ══════════════════════════════════════════
+// WEEK
+// ══════════════════════════════════════════
+function updateWeekDateLabel(){
+  const now=new Date(); const mon=new Date(now);
+  mon.setDate(now.getDate()-now.getDay()+1);
+  const sun=new Date(mon); sun.setDate(mon.getDate()+6);
+  const fmt=d=>d.toLocaleDateString('es-AR',{day:'numeric',month:'long'});
+  document.getElementById('week-date-label').textContent=`Semana del ${fmt(mon)} al ${fmt(sun)}`;
+}
+
+function renderWeek(){
+  let total=0,cals=0;
+  const body=document.getElementById('week-body');
+  body.innerHTML=DAYS.map(day=>{
+    let dayCal=0;
+    const rows=MEALS.map(mt=>{
+      const key=`${day}|${mt}`;
+      const r=plan[key]?recipes.find(x=>x.id===plan[key]):null;
+      if(r){total++;dayCal+=r.cals||0;cals+=r.cals||0;}
+      let content;
+      if(r){
+        const ytOk=r.ytId&&r.ytId.length===11;
+        const img=ytOk?`<img class="meal-thumb" src="https://img.youtube.com/vi/${r.ytId}/mqdefault.jpg" loading="lazy" onerror="this.outerHTML='<div class=\\'meal-ph\\'>🍽</div>'">`:`<div class="meal-ph">🍽</div>`;
+        content=`${img}<div class="meal-info"><div class="meal-name">${r.name}</div>${showCals&&r.cals?`<div class="meal-kcal-txt">${r.cals} kcal</div>`:''}</div>`;
+      } else {
+        content=`<div class="meal-empty">Tap para elegir</div>`;
+      }
+      const actions=r?`<div class="meal-actions"><div class="meal-btn meal-btn-eye" onclick="event.stopPropagation();openDetail('${r.id}')">👁</div><div class="meal-btn meal-btn-del" onclick="event.stopPropagation();delMeal('${key}')">✕</div></div>`:`<div class="meal-btn meal-btn-add" onclick="event.stopPropagation();openPick('${day}','${mt}')">+</div>`;
+      return `<div class="meal-row" onclick="openPick('${day}','${mt}')"><div class="meal-type">${mt}</div>${content}${actions}</div>`;
+    }).join('');
+    return `<div class="day-block"><div class="day-head"><div class="day-name">${day}</div>${showCals&&dayCal?`<div class="day-kcal">${dayCal} kcal</div>`:''}</div>${rows}</div>`;
+  }).join('');
+  document.getElementById('stat-count').textContent=total;
+  document.getElementById('stat-cals').textContent=cals.toLocaleString('es-AR');
+  document.getElementById('stat-cals-pill').style.display=showCals?'':'none';
+}
+
+function toggleCals(on){showCals=on;renderWeek();}
+
+// PICK
+function openPick(day,meal){
+  editKey=`${day}|${meal}`;
+  document.getElementById('mo-pick-title').textContent=`${day} · ${meal}`;
+  const grid=document.getElementById('mo-pick-grid');
+  if(!recipes.length){grid.innerHTML=`<div class="empty"><div class="empty-icon">📝</div><div class="empty-txt">Sin recetas. El admin aún no cargó recetas.</div></div>`;return;}
+  grid.innerHTML=recipes.map(r=>{
+    const ytOk=r.ytId&&r.ytId.length===11;
+    const img=ytOk?`<img class="pick-thumb" src="https://img.youtube.com/vi/${r.ytId}/mqdefault.jpg" loading="lazy" onerror="this.outerHTML='<div class=\\'pick-ph\\'>🍽</div>'">`:`<div class="pick-ph">🍽</div>`;
+    return `<div class="pick-card${plan[editKey]===r.id?' on':''}" onclick="pickR('${r.id}')">
+      ${img}<div class="pick-name">${r.name}</div>${r.cals?`<div class="pick-kcal">${r.cals} kcal</div>`:''}
+    </div>`;
+  }).join('');
+  openMo('mo-pick');
+}
+function pickR(id){
+  plan[editKey]=id;
+  localStorage.setItem('tc_plan',JSON.stringify(plan));
+  closeMo('mo-pick');
+  renderWeek();
+  toast('Receta agregada ✓');
+}
+
+function delMeal(key){
+  delete plan[key];
+  localStorage.setItem('tc_plan',JSON.stringify(plan));
+  renderWeek();
+}
+// DETAIL
+function openDetail(rid){
+  const r=recipes.find(x=>x.id===rid);if(!r) return;
+  const pers=parseInt(currentUser?.personas||profile?.personas||2);
+  const factor=pers/parseInt(r.porciones||2);
+  const ytOk=r.ytId&&r.ytId.length===11;
+  const hero=ytOk?`<img class="detail-img" src="https://img.youtube.com/vi/${r.ytId}/hqdefault.jpg" onerror="this.outerHTML='<div class=\\'detail-ph\\'>🍳</div>'">`:`<div class="detail-ph">🍳</div>`;
+  const ytBtn=ytOk?`<a class="yt-btn" href="${r.ytUrl}" target="_blank">▶ Ver en YouTube</a>`:'';
+  const ingrs=(r.ingredientes||[]).map(i=>{
+    let q=(parseFloat(i.c)||0)*factor;
+    let d=q%1===0?q.toFixed(0):(q<10?q.toFixed(1):Math.round(q).toString());
+    return `<div class="ingr-item" style="padding:.4rem 0"><div class="ingr-chk"></div><div class="ingr-name">${i.n}</div><div class="ingr-qty">${d} ${i.u}</div></div>`;
+  }).join('');
+  const steps=(r.pasos||[]).map((p,i)=>`<div class="step-item"><div class="step-num">${i+1}</div><div class="step-txt">${p}</div></div>`).join('');
+  document.getElementById('mo-detail-body').innerHTML=`
+    ${hero}
+    <div class="modal-title">${r.name}</div>
+    ${ytBtn}
+    ${r.cals?`<p style="font-size:13px;color:var(--ink3);margin-bottom:1rem">🔥 ${r.cals} kcal por porción · rinde ${r.porciones||2} porciones</p>`:''}
+    ${ingrs?`<div style="font-size:12px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin:.75rem 0 .4rem">Ingredientes (para ${pers} persona${pers!==1?'s':''})</div>${ingrs}`:''}
+    ${steps?`<div style="font-size:12px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin:.75rem 0 .75rem">Preparación</div>${steps}`:''}
+  `;
+  openMo('mo-detail');
+}
+
+// ══════════════════════════════════════════
+// COMPRAS
+// ══════════════════════════════════════════
+function renderCompras(){
+  plan    = JSON.parse(localStorage.getItem('tc_plan')    || '{}');
+  recipes = JSON.parse(localStorage.getItem('tc_recipes') || '[]');
+
+  const pers = parseInt((currentUser && currentUser.personas) || 2);
+  const all  = {};
+  const included = [];
+
+  Object.values(plan).forEach(function(rid){
+    var r = recipes.find(function(x){ return x.id === rid; });
+    if(!r) return;
+    if(!included.find(function(x){ return x.id === r.id; })) included.push(r);
+    if(!r.ingredientes || !r.ingredientes.length) return;
+    var porciones = Math.max(1, parseInt(r.porciones) || 2);
+    var factor    = pers / porciones;
+    r.ingredientes.forEach(function(i){
+      var nombre   = ((i.n || i.nombre   || '')).toString().trim();
+      var cantidad = (i.c  || i.cantidad || '0').toString();
+      var unidad   = ((i.u || i.unidad   || '')).toString().trim();
+      if(!nombre) return;
+      var k = nombre.toLowerCase() + '||' + unidad.toLowerCase();
+      if(!all[k]) all[k] = { n: nombre, u: unidad, total: 0 };
+      all[k].total += (parseFloat(cantidad) || 0) * factor;
+    });
+  });
+
+  var items = Object.values(all).sort(function(a,b){ return a.n.localeCompare(b.n); });
+
+  document.getElementById('buy-count').textContent   = items.length;
+  document.getElementById('buy-sub-txt').textContent = items.length
+    ? ('Para ' + pers + ' persona' + (pers!==1?'s':'') + ' \u00b7 ' + items.length + ' ingrediente' + (items.length!==1?'s':''))
+    : 'Eleg\u00ed recetas para ver la lista';
+
+  var body = document.getElementById('buy-body');
+  if(!body) return;
+
+  if(!items.length){
+    body.innerHTML = '<div class="empty"><div class="empty-icon">\uD83D\uDED2</div><div class="empty-txt">Eleg\u00ed recetas en el men\u00fa semanal<br>para ver qu\u00e9 necesit\u00e1s comprar.</div></div>';
+    return;
+  }
+
+  // Cabecera: recetas incluidas
+  var summaryHTML = '';
+  if(included.length){
+    var tags = included.map(function(r){
+      return '<span style="background:var(--white);border:1px solid var(--g4);border-radius:14px;padding:3px 10px;font-size:12px;color:var(--g2);font-weight:500">' + r.name + '</span>';
+    }).join('');
+    summaryHTML = '<div style="background:var(--g6);border-radius:var(--rs);padding:.75rem 1rem;margin-bottom:1rem;border:1px solid var(--g5)">'
+      + '<div style="font-size:11px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Recetas incluidas</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:6px">' + tags + '</div>'
+      + '</div>';
+  }
+
+  // Filas
+  var rowsHTML = items.map(function(i){
+    var k    = i.n.toLowerCase() + '||' + i.u.toLowerCase();
+    var done = checked[k] || false;
+    var q    = i.total;
+    var d    = q===0 ? '-' : q%1===0 ? q.toFixed(0) : q<10 ? q.toFixed(1) : Math.round(q).toString();
+    var rowId = 'ingr_' + k.replace(/[^a-z0-9]/g,'_');
+    var safeK = k.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div class="ingr-item" id="' + rowId + '">'
+      + '<div class="ingr-chk' + (done?' done':'') + '" onclick="togChk(\'' + safeK + '\')"></div>'
+      + '<div class="ingr-name' + (done?' done':'') + '">' + i.n + '</div>'
+      + '<div class="ingr-qty">' + d + (i.u ? ' <span style="font-size:11px;color:var(--ink4)">' + i.u + '</span>' : '') + '</div>'
+      + '</div>';
+  }).join('');
+
+  body.innerHTML = summaryHTML + '<div class="ingr-list">' + rowsHTML + '</div>';
+}
+
+function togChk(k){
+  checked[k] = !checked[k];
+  localStorage.setItem('tc_chk', JSON.stringify(checked));
+  var rowId = 'ingr_' + k.replace(/[^a-z0-9]/g,'_');
+  var row   = document.getElementById(rowId);
+  if(row){
+    row.querySelector('.ingr-chk').classList.toggle('done',  !!checked[k]);
+    row.querySelector('.ingr-name').classList.toggle('done', !!checked[k]);
+  } else {
+    renderCompras();
+  }
+}
+
+
+// ══════════════════════════════════════════
+// PROMOS
+// ══════════════════════════════════════════
+function renderBankFilter(){
+  const banks=['Todos',...new Set(promos.map(p=>p.banco))];
+  document.getElementById('bank-filter').innerHTML=banks.map((b,i)=>
+    `<div class="bchip${(!bankFilter&&i===0)||b===bankFilter?' on':''}" onclick="filterBank('${b==='Todos'?'':b}',this)">${b}</div>`
+  ).join('');
+}
+function filterBank(b,el){bankFilter=b;document.querySelectorAll('.bchip').forEach(c=>c.classList.remove('on'));el.classList.add('on');renderPromos();}
+
+function renderPromos(){
+  const filtered=bankFilter?promos.filter(p=>p.banco===bankFilter):promos;
+  const byStore={};
+  filtered.forEach(p=>{if(!byStore[p.super])byStore[p.super]=[];byStore[p.super].push(p);});
+  const body=document.getElementById('promos-body');
+  if(!filtered.length){body.innerHTML=`<div class="empty"><div class="empty-icon">🏦</div><div class="empty-txt">No hay promos para el banco seleccionado.</div></div>`;return;}
+  body.innerHTML=Object.entries(byStore).map(([sid,ps])=>{
+    const s=STORES[sid]||{name:sid,color:'#555'};
+    const items=ps.map(p=>`<div class="promo-item">
+      <div class="promo-bank">${p.banco}</div>
+      <div style="flex:1"><div class="promo-txt">${p.desc}</div>${p.dias?`<div class="promo-days">${p.dias}${p.vigencia?' · '+p.vigencia:''}</div>`:''}</div>
+      ${p.disc?`<div class="promo-disc">-${p.disc}%</div>`:''}
+    </div>`).join('');
+    return `<div class="super-card"><div class="super-head"><div class="store-logo" style="background:${s.color}">${s.name}</div><div><div class="store-nm">${s.name}</div></div></div>${items}</div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// PERFIL
+// ══════════════════════════════════════════
+function loadProfileIntoForm(){
+  const u=currentUser||{};
+  if(u.name) document.getElementById('pf-name').value=u.name;
+  if(u.apellido) document.getElementById('pf-apellido').value=u.apellido;
+  if(u.email) document.getElementById('pf-email').value=u.email;
+  if(u.wapp) document.getElementById('pf-wapp').value=u.wapp;
+  if(u.city) document.getElementById('pf-city').value=u.city;
+  if(u.personas) document.getElementById('pf-personas').value=u.personas;
+  if(u.banco) document.getElementById('pf-banco').value=u.banco;
+  updateProfileHero();
+}
+function updateProfileHero(){
+  const n=document.getElementById('pf-name')?.value.trim()||'';
+  const c=document.getElementById('pf-city')?.value.trim()||'';
+  document.getElementById('profile-hero-name').textContent=n?`${n} ${document.getElementById('pf-apellido')?.value||''}`.trim():'Tu perfil';
+  if(c) document.getElementById('profile-hero-city').textContent='📍 '+c;
+  const pct=calcPct();
+  document.getElementById('pct-fill').style.width=pct+'%';
+  document.getElementById('pct-txt').textContent=`${pct}% completado`;
+  document.getElementById('nav-avatar').textContent=(n||'U').slice(0,2).toUpperCase();
+}
+function calcPct(){
+  let d=0,t=5;
+  if(document.getElementById('pf-name')?.value.trim()) d++;
+  if(document.getElementById('pf-city')?.value.trim()) d++;
+  if(document.getElementById('pf-personas')?.value) d++;
+  if(document.getElementById('pf-banco')?.value) d++;
+  if(document.querySelectorAll('#pref-chips .chip.on').length) d++;
+  return Math.round(d/t*100);
+}
+function renderPerfil(){
+  loadProfileIntoForm();
+  const plan=currentUser?.plan||'mensual';
+  document.getElementById('subs-label').textContent=`Plan ${plan==='anual'?'Anual':'Mensual'} activo`;
+  const next=new Date(); next.setMonth(next.getMonth()+(plan==='anual'?12:1));
+  document.getElementById('subs-sub').textContent=`Próximo vencimiento: ${next.toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'})}`;
+}
+function saveProfile(){
+  const updated={...currentUser,name:document.getElementById('pf-name').value,apellido:document.getElementById('pf-apellido').value,email:document.getElementById('pf-email').value,wapp:document.getElementById('pf-wapp').value,city:document.getElementById('pf-city').value,personas:document.getElementById('pf-personas').value,banco:document.getElementById('pf-banco').value};
+  currentUser=updated; localStorage.setItem('tc_user',JSON.stringify(updated));
+  updateProfileHero(); toast('Perfil guardado ✓');
+}
+function togChip(el){el.classList.toggle('on');}
+function togChipSingle(el,grpId){document.querySelectorAll(`#${grpId} .chip`).forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+
+// ══════════════════════════════════════════
+// WHATSAPP SIMULATION
+// ══════════════════════════════════════════
+function buildWAMessage(name){
+  const weekRecipes=Object.values(plan).slice(0,4).map(rid=>recipes.find(x=>x.id===rid)?.name).filter(Boolean);
+  const list=weekRecipes.length?weekRecipes.map(r=>`• ${r}`).join('\n'):'• Mirá las recetas disponibles en la app';
+  return `¡Hola ${name||''}! 👋\n\n🍳 *Tu menú semanal de Tali Cocina está listo*\n\nEsta semana te recomendamos:\n${list}\n\n📋 Entrá a la app para ver tu lista de compras completa con cantidades.\n\n🏦 ¡No te olvides de revisar las promos bancarias en tu zona!\n\n_Tali Cocina · @talicocina_`;
+}
+function buildWAPreview(msg){
+  const lines=msg.split('\n').map(l=>l.replace(/\*(.*?)\*/g,'<strong>$1</strong>').replace(/_(.*?)_/g,'<em>$1</em>')).join('<br>');
+  return `<div class="wa-phone"><div class="wa-header"><div class="wa-avatar">🍳</div><div><div class="wa-name">Tali Cocina</div><div class="wa-status">en línea</div></div></div><div class="wa-body"><div class="wa-bubble">${lines}<div class="wa-time">ahora <span class="wa-tick">✓✓</span></div></div></div></div>`;
+}
+
+// ══════════════════════════════════════════
+// MODALS / TOAST / UTILS
+// ══════════════════════════════════════════
+function openMo(id){document.getElementById(id).classList.add('on');}
+function closeMo(id,e){if(!e||e.target.id===id)document.getElementById(id).classList.remove('on');}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2500);}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('load',()=>{
+  if(currentUser){ loadProfileIntoForm(); enterApp(); }
+  else showScreen('login');
+  // Listen for recipe/promo updates from admin
+  window.addEventListener('storage',e=>{
+    if(e.key==='tc_recipes'){ recipes=JSON.parse(e.newValue||'[]'); renderWeek(); }
+    if(e.key==='tc_promos'){ promos=JSON.parse(e.newValue||'[]'); renderBankFilter(); renderPromos(); }
+    if(e.key==='tc_wa_notify'){
+      const d=JSON.parse(e.newValue||'{}');
+      if(d.trigger&&currentUser){
+        const msg=buildWAMessage(currentUser.name);
+        toast('📱 Nuevo mensaje de WhatsApp recibido');
+        setTimeout(()=>{ alert('📱 SIMULACIÓN WhatsApp:\n\n'+msg.replace(/<[^>]+>/g,'')); },400);
+        localStorage.removeItem('tc_wa_notify');
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>
