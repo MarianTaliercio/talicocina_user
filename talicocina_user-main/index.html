@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tali Cocina · App</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- ══ TOP NAV ══ -->
+<nav class="topnav" id="topnav" style="display:none">
+  <div class="topnav-inner">
+    <div class="nav-brand">
+      <div class="nav-brand-icon">🍳</div>
+      <div>
+        <div class="nav-brand-name">Tali Cocina</div>
+        <div class="nav-brand-sub">@talicocina</div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <div class="nav-link active" onclick="showScreen('semana',this)">Semana</div>
+      <div class="nav-link" onclick="showScreen('compras',this)">Compras</div>
+      <div class="nav-link" onclick="showScreen('promos',this)">Promos</div>
+      <div class="nav-link" onclick="showScreen('perfil',this)">Perfil</div>
+    </div>
+    <div class="nav-user">
+      <span class="nav-plan-badge" id="nav-plan-badge">Mensual</span>
+      
+      <div class="nav-avatar" id="nav-avatar" onclick="showScreen('perfil')">TC</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ LOGIN ══ -->
+<div class="screen on" id="screen-login">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-hero">
+        <div class="auth-logo">🍳</div>
+        <div class="auth-title">Tali Cocina</div>
+        <div class="auth-sub">Tu menú semanal personalizado</div>
+      </div>
+      <div class="auth-body">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="login-email" type="email" placeholder="tu@email.com" value="stefano@gmail.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input class="form-input" id="login-pass" type="password" placeholder="••••••••" >
+          <div class="form-error" id="login-error"></div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="doLogin()" id="login-btn">Ingresar</button>
+        <div class="divider-text"><span>o</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
+          <button class="btn btn-outline" onclick="doLogin()">G Google</button>
+          <button class="btn btn-outline" onclick="doLogin()">f Facebook</button>
+        </div>
+        <div class="auth-footer">¿No tenés cuenta? <a href="#" onclick="showScreen('register')">Registrarse</a></div>
+        <div class="auth-footer"><a href="#" onclick="forgotPassword()">¿Olvidaste tu contraseña?</a></div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REGISTRO ══ -->
+<div class="screen" id="screen-register">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-hero">
+        <div class="auth-logo">🍳</div>
+        <div class="auth-title">Crear cuenta</div>
+        <div class="auth-sub">Comenzá tu semana con las mejores recetas</div>
+      </div>
+      <div class="auth-body">
+        <div class="steps" id="reg-steps">
+          <div class="step-dot on"></div>
+          <div class="step-dot"></div>
+          <div class="step-dot"></div>
+        </div>
+
+        <!-- Paso 1: Datos personales -->
+        <div id="reg-step-1">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="reg-name" placeholder="Tu nombre"></div>
+            <div class="form-group"><label class="form-label">Apellido</label><input class="form-input" id="reg-apellido" placeholder="Tu apellido"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="reg-email" type="email" placeholder="tu@email.com"></div>
+          <div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" id="reg-pass" type="password" placeholder="Mínimo 8 caracteres"></div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp</label>
+            <input class="form-input" id="reg-wapp" type="tel" placeholder="+54 9 223 000-0000">
+            <div class="form-hint">Para recibir las recetas semanales</div>
+          </div>
+
+
+
+
+          <div class="form-group"><label class="form-label">Ciudad</label><input class="form-input" id="reg-city" placeholder="Ej: Mar del Plata"></div>
+          
+          
+          
+          
+          
+          <button class="btn btn-primary btn-full" onclick="validateRegisterStep1()">Continuar →</button>
+        </div>
+
+        <!-- Paso 2: Plan -->
+        <div id="reg-step-2" style="display:none">
+          <p style="font-size:14px;color:var(--ink2);margin-bottom:1rem;line-height:1.6">Elegí el plan que más te conviene. Podés cancelar cuando quieras.</p>
+          <div class="plan-grid">
+            <div class="plan-card selected" id="plan-mensual" onclick="selectPlan('mensual')">
+              <div class="plan-popular">+ popular</div>
+              <div class="plan-name">Mensual</div>
+              <div class="plan-price">$1.990</div>
+              <div class="plan-per">por mes</div>
+              <div class="plan-features">
+                <div class="plan-feat">Todas las recetas</div>
+                <div class="plan-feat">Menú personalizado</div>
+                <div class="plan-feat">Lista de compras</div>
+                <div class="plan-feat">Promos bancarias</div>
+              </div>
+            </div>
+            <div class="plan-card" id="plan-anual" onclick="selectPlan('anual')">
+              <div class="plan-name">Anual</div>
+              <div class="plan-price">$16.900</div>
+              <div class="plan-per">por año · 2 meses gratis</div>
+              <div class="plan-features">
+                <div class="plan-feat">Todo lo del mensual</div>
+                <div class="plan-feat">2 meses gratis</div>
+                <div class="plan-feat">Prioridad en soporte</div>
+              </div>
+            </div>
+          </div>
+          <div class="mp-strip">
+            <span style="font-size:13px;color:var(--ink3)">Pagos seguros con</span>
+            <span class="mp-logo">MercadoPago</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1rem">
+            <button class="btn btn-outline" onclick="regStep(1)">← Atrás</button>
+            <button class="btn btn-primary" onclick="regStep(3)">Continuar →</button>
+          </div>
+        </div>
+
+        <!-- Paso 3: Tarjeta -->
+        <div id="reg-step-3" style="display:none">
+          <div class="cc-visual" id="cc-visual">
+            <div class="cc-chip"></div>
+            <div class="cc-number" id="cc-display">•••• •••• •••• ••••</div>
+            <div class="cc-bottom">
+              <div><div class="cc-label">Titular</div><div class="cc-value" id="cc-name-display">NOMBRE APELLIDO</div></div>
+              <div><div class="cc-label">Vence</div><div class="cc-value" id="cc-exp-display">MM/AA</div></div>
+              <div class="cc-brand" id="cc-brand">💳</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Número de tarjeta</label>
+            <input class="form-input" id="cc-number" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCC(this)" inputmode="numeric">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nombre en la tarjeta</label>
+            <input class="form-input" id="cc-name" placeholder="Como aparece en la tarjeta" oninput="document.getElementById('cc-name-display').textContent=this.value.toUpperCase()||'NOMBRE APELLIDO'">
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Vencimiento</label><input class="form-input" id="cc-exp" placeholder="MM/AA" maxlength="5" oninput="formatExp(this)"></div>
+            <div class="form-group"><label class="form-label">CVV</label><input class="form-input" id="cc-cvv" placeholder="•••" maxlength="4" type="password" inputmode="numeric"></div>
+          </div>
+          <div style="background:var(--g6);border-radius:var(--rx);padding:.75rem 1rem;margin-bottom:1rem;font-size:12px;color:var(--ink3);display:flex;gap:6px">
+            <span>🔒</span><span>Tus datos están protegidos. Esta es una simulación — no se cobra nada real.</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button class="btn btn-outline" onclick="regStep(2)">← Atrás</button>
+            <button class="btn btn-primary" id="pay-btn" onclick="doPayment()">
+              <span id="pay-btn-txt">Confirmar suscripción</span>
+            </button>
+          </div>
+        </div>
+        <div class="auth-footer" style="margin-top:.75rem">¿Ya tenés cuenta? <a href="#" onclick="showScreen('login')">Ingresar</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SEMANA ══ -->
+<div class="screen" id="screen-semana">
+  <div class="page">
+    <div class="week-header">
+      <div>
+        <div class="week-title">Menú de la semana</div>
+        <div style="font-size:13px;color:var(--ink3);margin-top:3px" id="week-date-label"></div>
+      </div>
+      <div class="week-stats">
+        <div class="stat-pill"><strong id="stat-count">0</strong> recetas</div>
+        <div class="stat-pill" id="stat-cals-pill" style="display:none"><strong id="stat-cals">0</strong> kcal</div>
+      </div>
+    </div>
+    <label class="cal-toggle-row">
+      <label class="toggle">
+        <input type="checkbox" id="cal-toggle" onchange="toggleCals(this.checked)">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+      <span style="font-size:13px;color:var(--ink2)">Mostrar calorías</span>
+    </label>
+    <div id="week-body"></div>
+  </div>
+</div>
+
+<!-- ══ COMPRAS ══ -->
+<div class="screen" id="screen-compras">
+  <div class="page">
+    <div class="buy-hero">
+      <div>
+        <div class="buy-hero-title">Lista de compras</div>
+        <div class="buy-hero-sub" id="buy-sub-txt">Basada en tu menú semanal</div>
+      </div>
+      <div class="buy-count" id="buy-count">0</div>
+    </div>
+    <div id="buy-body"></div>
+  </div>
+</div>
+
+<!-- ══ PROMOS ══ -->
+<div class="screen" id="screen-promos">
+  <div class="page">
+    <div class="promo-hero">
+      <div class="promo-hero-title">🏦 Promociones bancarias</div>
+      <div class="promo-hero-sub" id="promo-city-lbl">Cargando tu ubicación…</div>
+    </div>
+    <div class="bank-filter-row" id="bank-filter"></div>
+    <div id="promos-body"></div>
+  </div>
+</div>
+
+<!-- ══ PERFIL ══ -->
+<div class="screen" id="screen-perfil">
+  <div class="page" style="max-width:680px">
+    <div class="profile-hero">
+      <div class="profile-avatar-big" id="profile-avatar">👤</div>
+      <div>
+        <div class="profile-hero-name" id="profile-hero-name">Tu perfil</div>
+        <div class="profile-hero-city" id="profile-hero-city">📍 Sin ciudad</div>
+        <div class="profile-pct">
+          <div class="profile-pct-bar"><div class="profile-pct-fill" id="pct-fill" style="width:0%"></div></div>
+          <div class="profile-pct-txt" id="pct-txt">0% completado</div>
+        </div>
+        <div><button class="theme-btn" onclick="toggleTheme()">🌓</button></div>
+      </div>
+    </div>
+    <div class="subs-status">
+      <div class="subs-status-left">
+        <div class="subs-dot"></div>
+        <div>
+          <div class="subs-label" id="subs-label">Plan Mensual activo</div>
+          <div class="subs-sub" id="subs-sub">Próximo vencimiento: —</div>
+        </div>
+      </div>
+      <span class="badge badge-green" id="subs-badge">Activo</span>
+    </div>
+    <div class="card">
+      <div style="font-size:16px;font-weight:500;margin-bottom:1rem">Datos personales</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="pf-name" placeholder="Tu nombre" oninput="updateProfileHero()"></div>
+        <div class="form-group"><label class="form-label">Apellido</label><input class="form-input" id="pf-apellido" placeholder="Tu apellido"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="pf-email" type="email"></div>
+      <div class="form-group"><label class="form-label">Contraseña</label><input type="password" id="pf-password" class="form-input"></div>
+      <div class="form-group">
+        <label class="form-label">WhatsApp</label>
+        <input class="form-input" id="pf-wapp" type="tel" placeholder="+54 9 223 000-0000">
+        <div class="form-hint">Para recibir las recetas semanales</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Ciudad</label><input class="form-input" id="pf-city" placeholder="Ej: Mar del Plata" oninput="updateProfileHero()"></div>
+        <div class="form-group">
+          <label class="form-label">Personas en el hogar</label>
+          <select class="form-input" id="pf-personas">
+            <option value="1">1 persona</option><option value="2" selected>2 personas</option>
+            <option value="3">3 personas</option><option value="4">4 personas</option><option value="5">5 o más</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Banco principal</label>
+        <select class="form-input" id="pf-banco">
+          <option value="">Sin preferencia</option>
+          <option>Banco Nación</option><option>Banco Provincia</option><option>Santander</option>
+          <option>BBVA</option><option>HSBC</option><option>Galicia</option><option>Macro</option>
+          <option>ICBC</option><option>Patagonia</option><option>Naranja X</option>
+          <option>Mercado Pago</option><option>MODO</option>
+        </select>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:16px;font-weight:500;margin-bottom:.75rem">Alergias / Restricciones</div>
+      <div class="chips-row" id="alergias-chips">
+        <div class="chip red" onclick="togChip(this)">Gluten</div>
+        <div class="chip red" onclick="togChip(this)">Lactosa</div>
+        <div class="chip red" onclick="togChip(this)">Maní</div>
+        <div class="chip red" onclick="togChip(this)">Mariscos</div>
+        <div class="chip red" onclick="togChip(this)">Frutos secos</div>
+        <div class="chip red" onclick="togChip(this)">Huevo</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:16px;font-weight:500;margin-bottom:.75rem">Preferencias alimentarias</div>
+      <div class="chips-row" id="pref-chips">
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Omnívoro</div>
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Vegetariano</div>
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Vegano</div>
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Low carb</div>
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Sin azúcar</div>
+        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Alta proteína</div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveProfile()" style="margin-bottom:.75rem">Guardar cambios</button>
+    <button class="btn btn-outline btn-full" onclick="doLogout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: Elegir receta ══ -->
+<div class="modal-overlay" id="mo-pick" onclick="closeMo('mo-pick',event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mo-pick-title">Elegir receta</div>
+    <div class="pick-grid" id="mo-pick-grid"></div>
+    <button class="btn btn-outline btn-full" onclick="closeMo('mo-pick')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: Detalle receta ══ -->
+<div class="modal-overlay" id="mo-detail" onclick="closeMo('mo-detail',event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div id="mo-detail-body"></div>
+    <button class="btn btn-outline btn-full" onclick="closeMo('mo-detail')">Cerrar</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: Pago exitoso ══ -->
+<div class="modal-overlay" id="mo-payment-success" onclick="closeMo('mo-payment-success',event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()" style="text-align:center;padding:2rem">
+    <div style="font-size:56px;margin-bottom:1rem">🎉</div>
+    <div class="modal-title" style="text-align:center">¡Bienvenida a Tali Cocina!</div>
+    <p style="font-size:14px;color:var(--ink2);margin-bottom:1.5rem;line-height:1.7">Tu suscripción está activa. Ya podés armar tu menú semanal y recibir las recetas por WhatsApp.</p>
+    <div style="margin-bottom:1.5rem" id="wa-preview-success"></div>
+    <button class="btn btn-primary btn-full" onclick="closeMo('mo-payment-success');enterApp()">¡Empezar a planificar!</button>
+  </div>
+</div>
+
+<!-- ══ BOTTOM NAV (mobile) ══ -->
+<nav class="bottom-nav" id="bottom-nav" style="display:none">
+  <div class="bnav-item on"  id="bn-semana"  onclick="showScreen('semana'); setBottomNav('bn-semana')"><div class="bnav-icon">📅</div><div class="bnav-lbl">Semana</div></div>
+  <div class="bnav-item"     id="bn-compras" onclick="showScreen('compras');setBottomNav('bn-compras')"><div class="bnav-icon">🛒</div><div class="bnav-lbl">Compras</div></div>
+  <div class="bnav-item"     id="bn-promos"  onclick="showScreen('promos'); setBottomNav('bn-promos')"><div class="bnav-icon">🏦</div><div class="bnav-lbl">Promos</div></div>
+  <div class="bnav-item"     id="bn-perfil"  onclick="showScreen('perfil'); setBottomNav('bn-perfil')"><div class="bnav-icon">👤</div><div class="bnav-lbl">Perfil</div></div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/state.js"></script>
+<script src="js/data.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/whatsapp.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/password.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/week.js"></script>
+<script src="js/shopping.js"></script>
+<script src="js/promos.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
