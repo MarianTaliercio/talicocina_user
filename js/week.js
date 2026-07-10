@@ -141,3 +141,11 @@ function openDetail(rid){
   `;
   openMo('mo-detail');
 }
+
+
+
+// Guardar recetas
+async function comidaguardada() {
+  toast('Comida Guardada ✓')
+  
+}

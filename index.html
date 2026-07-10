@@ -205,8 +205,11 @@
       </label>
       <span style="font-size:13px;color:var(--ink2)">Mostrar calorías</span>
     </label>
-    <div id="week-body"></div>
+    <div id="week-body"></div>  
+    <button class="btn btn-primary btn-full" onclick="comidaguardada()" style="margin-bottom:.75rem">Guardar comida</button>
+
   </div>
+
 </div>
 
 <!-- ══ COMPRAS ══ -->
@@ -219,6 +222,8 @@
       </div>
       <div class="buy-count" id="buy-count">0</div>
     </div>
+    <!-- FILTROS -->
+    <div id="compras-filtros" class="bank-filter-row"></div>
     <div id="buy-body"></div>
   </div>
 </div>
@@ -247,8 +252,7 @@
           <div class="profile-pct-bar"><div class="profile-pct-fill" id="pct-fill" style="width:0%"></div></div>
           <div class="profile-pct-txt" id="pct-txt">0% completado</div>
         </div>
-        <div><button class="theme-btn" onclick="toggleTheme()">🌓</button></div>
-      </div>
+      </div><button class="theme-btn" onclick="toggleTheme()">🌓</button>
     </div>
     <div class="subs-status">
       <div class="subs-status-left">
