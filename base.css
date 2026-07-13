@@ -331,3 +331,74 @@ textarea.form-input { min-height: 100px; resize: vertical; line-height: 1.5; }
     --g6:#173117;
 
 }
+
+
+
+
+
+
+/*═══════════════════════════════════════
+            CHEF LOGIN
+═══════════════════════════════════════*/
+
+.chef-login{
+    position: relative;
+    width: 260px;
+    margin: 20px auto;
+}
+
+.chef-base{
+    display: block;
+    width: 100%;
+}
+
+.chef-eyes{
+    position: absolute;
+
+    /* Ajustá estos valores una sola vez */
+    top: 60px;
+    left: 89px;
+    width: 75px;
+
+    pointer-events: none;
+    user-select: none;
+
+    /* Sin transición de movimiento */
+    transition: opacity .15s;
+}
+.chef-eyes.closed{
+    top: 68px;   /* Ajustá estos valores */
+    left:86px;
+    width: 80px;
+}
+
+/*═══════════════════════════════════════
+            ANIMACIONES
+═══════════════════════════════════════*/
+
+.chef-success{
+    animation: bounce .45s;
+}
+
+@keyframes bounce{
+
+    0%{transform:scale(1);}
+    50%{transform:scale(1.06);}
+    100%{transform:scale(1);}
+
+}
+
+.chef-error{
+    animation: shake .45s;
+}
+
+@keyframes shake{
+
+    0%{transform:translateX(0);}
+    20%{transform:translateX(-8px);}
+    40%{transform:translateX(8px);}
+    60%{transform:translateX(-8px);}
+    80%{transform:translateX(8px);}
+    100%{transform:translateX(0);}
+
+}

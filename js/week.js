@@ -82,25 +82,79 @@ function openPick(day, meal){
   editKey = `${day}|${meal}`;
   document.getElementById('mo-pick-title').textContent = `${day} · ${meal}`;
   const grid = document.getElementById('mo-pick-grid');
+
   if(!recipes.length){
-    grid.innerHTML = `<div class="empty"><div class="empty-icon">📝</div><div class="empty-txt">Sin recetas aún.<br>El admin no cargó recetas todavía.</div></div>`;
-  } else {
-    grid.innerHTML = recipes.map(r => {
-      const ytOk = r.ytId && r.ytId.length === 11;
-      const img  = ytOk
-        ? `<img class="pick-thumb" src="https://img.youtube.com/vi/${r.ytId}/mqdefault.jpg" loading="lazy" onerror="this.outerHTML='<div class=\\'pick-ph\\'>🍽</div>'">`
-        : `<div class="pick-ph">🍽</div>`;
-      return `<div class="pick-card${plan[editKey] === r.id ? ' on' : ''}" onclick="pickR('${r.id}')">
-        ${img}
-        <div class="pick-name">${r.name}</div>
-        ${r.cals ? `<div class="pick-kcal">${r.cals} kcal</div>` : ''}
+    grid.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">📝</div>
+        <div class="empty-txt">
+          Sin recetas aún.<br>
+          El admin no cargó recetas todavía.
+        </div>
       </div>`;
-    }).join('');
+  } else {
+
+    // ¿Permitir repetir comidas?
+    const permitirRepetidas = currentUser?.repetir_comidas ?? true;
+
+    // Si no se permiten repetidas, ocultar las que ya están usadas
+    const recetasDisponibles = permitirRepetidas
+      ? recipes
+      : recipes.filter(r => {
+          // Mantener visible la receta que ya está en esta casilla
+          if(plan[editKey] === r.id) return true;
+
+          // Ocultar recetas ya usadas en otra comida
+          return !Object.values(plan).includes(r.id);
+        });
+
+    if(!recetasDisponibles.length){
+      grid.innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">🍽️</div>
+          <div class="empty-txt">
+            No quedan recetas disponibles.<br>
+            Activá "Permitir repetir comidas" o agregá más recetas.
+          </div>
+        </div>`;
+    } else {
+
+      grid.innerHTML = recetasDisponibles.map(r => {
+        const ytOk = r.ytId && r.ytId.length === 11;
+        const img = ytOk
+          ? `<img class="pick-thumb" src="https://img.youtube.com/vi/${r.ytId}/mqdefault.jpg" loading="lazy" onerror="this.outerHTML='<div class=\\'pick-ph\\'>🍽</div>'">`
+          : `<div class="pick-ph">🍽</div>`;
+
+        return `
+          <div class="pick-card${plan[editKey] === r.id ? ' on' : ''}" onclick="pickR('${r.id}')">
+            ${img}
+            <div class="pick-name">${r.name}</div>
+            ${r.cals ? `<div class="pick-kcal">${r.cals} kcal</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
   }
+
   openMo('mo-pick');
 }
 
 function pickR(id){
+
+  const permitirRepetidas = currentUser?.repetir_comidas ?? true;
+
+  if(!permitirRepetidas){
+
+    const yaUsada = Object.entries(plan).some(([key, receta]) =>
+      key !== editKey && receta === id
+    );
+
+    if(yaUsada){
+      toast('Esa comida ya fue elegida esta semana');
+      return;
+    }
+  }
+
   plan[editKey] = id;
   savePlan();
   closeMo('mo-pick');

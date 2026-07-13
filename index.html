@@ -37,31 +37,93 @@
 <div class="screen on" id="screen-login">
   <div class="auth-wrap">
     <div class="auth-card">
+
       <div class="auth-hero">
-        <div class="auth-logo">🍳</div>
+
+        <!-- CHEF -->
+        <div class="chef-login" id="chef">
+
+          <img
+            class="chef-base"
+            src="img/chef/chef-base.png"
+            draggable="false">
+
+          <img
+            id="chef-eyes"
+            class="chef-eyes"
+            src="img/chef/ojos-abiertos.png"
+            draggable="false">
+
+        </div>
+
         <div class="auth-title">Tali Cocina</div>
         <div class="auth-sub">Tu menú semanal personalizado</div>
+
       </div>
+
       <div class="auth-body">
+
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input class="form-input" id="login-email" type="email" placeholder="tu@email.com" value="stefano@gmail.com">
+
+          <input
+            class="form-input"
+            id="login-email"
+            type="email"
+            placeholder="tu@email.com"
+            value="stefano@gmail.com">
         </div>
+
         <div class="form-group">
           <label class="form-label">Contraseña</label>
-          <input class="form-input" id="login-pass" type="password" placeholder="••••••••" >
+
+          <input
+            class="form-input"
+            id="login-pass"
+            type="password"
+            placeholder="••••••••">
+
           <div class="form-error" id="login-error"></div>
         </div>
-        <button class="btn btn-primary btn-full" onclick="doLogin()" id="login-btn">Ingresar</button>
-        <div class="divider-text"><span>o</span></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
-          <button class="btn btn-outline" onclick="doLogin()">G Google</button>
-          <button class="btn btn-outline" onclick="doLogin()">f Facebook</button>
+
+        <button
+          class="btn btn-primary btn-full"
+          onclick="doLogin()"
+          id="login-btn">
+          Ingresar
+        </button>
+
+        <div class="divider-text">
+          <span>o</span>
         </div>
-        <div class="auth-footer">¿No tenés cuenta? <a href="#" onclick="showScreen('register')">Registrarse</a></div>
-        <div class="auth-footer"><a href="#" onclick="forgotPassword()">¿Olvidaste tu contraseña?</a></div>
-        
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">
+
+          <button class="btn btn-outline">
+            G Google
+          </button>
+
+          <button class="btn btn-outline">
+            f Facebook
+          </button>
+
+        </div>
+
+        <div class="auth-footer">
+          ¿No tenés cuenta?
+          <a href="#" onclick="showScreen('register')">
+            Registrarse
+          </a>
+        </div>
+
+        <div class="auth-footer">
+          <a href="#" onclick="forgotPassword()">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+
       </div>
+
     </div>
   </div>
 </div>
@@ -287,6 +349,25 @@
           </select>
         </div>
       </div>
+      <div class="field">
+    <label>¿Permitir repetir comidas?</label>
+
+    <div id="repeat-chips" class="chips">
+      <button type="button"
+              class="chip on"
+              id="repeat-si"
+              onclick="setRepeatMeals(true)">
+        ✅ Sí
+      </button>
+
+      <button type="button"
+              class="chip"
+              id="repeat-no"
+              onclick="setRepeatMeals(false)">
+        🚫 No
+      </button>
+    </div>
+</div>
       <div class="form-group">
         <label class="form-label">Banco principal</label>
         <select class="form-input" id="pf-banco">
@@ -379,6 +460,7 @@
 <script src="js/shopping.js"></script>
 <script src="js/promos.js"></script>
 <script src="app.js"></script>
+<script src="js/chef-animation.js"></script>
 
 </body>
 </html>

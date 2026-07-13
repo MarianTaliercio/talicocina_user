@@ -10,6 +10,9 @@ function loadProfileIntoForm(){
   if(u.banco)    document.getElementById('pf-banco').value    = u.banco;
   if(u.password)    document.getElementById('pf-password').value    = u.password;
   updateProfileHero();
+  const repetir = currentUser?.repetir_comidas !== false;
+
+  setRepeatMeals(repetir, false);
 }
 
 function updateProfileHero(){
@@ -53,7 +56,8 @@ async function saveProfile(){
     city: document.getElementById('pf-city').value.trim(),
     personas: document.getElementById('pf-personas').value,
     banco: document.getElementById('pf-banco').value,
-    password: document.getElementById('pf-password').value
+    password: document.getElementById('pf-password').value,
+    repetir_comidas: currentUser.repetir_comidas
   };
 
   const { error } = await window.db
@@ -86,4 +90,18 @@ function togChip(el){ el.classList.toggle('on'); }
 function togChipSingle(el, grpId){
   document.querySelectorAll(`#${grpId} .chip`).forEach(c => c.classList.remove('on'));
   el.classList.add('on');
+}
+
+
+// Repetir comida
+function setRepeatMeals(valor, guardar = true){
+
+  document.getElementById('repeat-si').classList.toggle('on', valor);
+  document.getElementById('repeat-no').classList.toggle('on', !valor);
+
+  currentUser.repetir_comidas = valor;
+
+  if(guardar){
+    updateProfileHero();
+  }
 }

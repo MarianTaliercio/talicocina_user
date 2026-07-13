@@ -45,6 +45,7 @@ function normalizeUser(row){
     plan: 'mensual',
     ...row,
     personas: row.personas || row.people || 2,
+    repetir_comidas: row.repetir_comidas ?? true,
   };
 }
 
