@@ -292,7 +292,7 @@ textarea.form-input { min-height: 100px; resize: vertical; line-height: 1.5; }
 
 .theme-btn{
     margin-left: auto;
-    margin-top: auto;
+    margin-top: center;
 
     width: 46px;
     height: 46px;
@@ -406,8 +406,8 @@ textarea.form-input { min-height: 100px; resize: vertical; line-height: 1.5; }
 
 /* Avatars */
 .profile-avatar-big{
-    width:110px;
-    height:110px;
+    width:130px;
+    height:130px;
     border-radius:50%;
     overflow:hidden;
     background:#fff;
@@ -421,26 +421,11 @@ textarea.form-input { min-height: 100px; resize: vertical; line-height: 1.5; }
     height:100%;
     object-fit:cover;
 }
-.profile-avatar-big{
-    width:90px;
-    height:90px;
-    border-radius:50%;
-    overflow:hidden;
-    cursor:pointer;
-    transition:.2s;
-    flex-shrink:0;
-}
 
 .profile-avatar-big:hover{
     transform:scale(1.05);
 }
 
-.profile-avatar-big img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
-}
 .avatar-grid{
     display:grid;
     grid-template-columns:repeat(3, 90px);
