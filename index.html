@@ -6,6 +6,7 @@
 <title>Tali Cocina · App</title>
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 <body>
 
@@ -414,7 +415,35 @@
     <button class="btn btn-outline btn-full" onclick="closeMo('mo-pick')">Cancelar</button>
   </div>
 </div>
+<!-- ── MODAL FLYER ───────────────────────────── -->
+<div class="modal-overlay" id="mo-flyer" onclick="closeMo('mo-flyer',event)">
+  <div class="modal-sheet flyer-modal" onclick="event.stopPropagation()">
 
+    <div class="modal-handle"></div>
+
+    <div class="modal-title">
+      Compartir menú
+    </div>
+
+    <div id="flyer-preview"></div>
+
+    <div class="flyer-actions">
+      <button class="btn btn-outline" onclick="Flyer.download()">
+        Descargar
+      </button>
+
+      <button class="btn btn-primary" onclick="Flyer.share()">
+        Compartir
+      </button>
+    </div>
+
+    <button class="btn btn-outline btn-full"
+            onclick="closeMo('mo-flyer')">
+      Cerrar
+    </button>
+
+  </div>
+</div>
 <!-- ══ MODAL: Detalle receta ══ -->
 <div class="modal-overlay" id="mo-detail" onclick="closeMo('mo-detail',event)">
   <div class="modal-sheet" onclick="event.stopPropagation()">
@@ -459,7 +488,9 @@
 <script src="js/shopping.js"></script>
 <script src="js/promos.js"></script>
 <script src="app.js"></script>
-<script src="js/chef-animation.js"></script>
+<script src="js/chef-animation.js"></script>\
+<script src="js/flyer.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <div class="modal-overlay" id="mo-avatar" onclick="closeMo('mo-avatar',event)">
   <div class="modal-sheet" onclick="event.stopPropagation()">
 
@@ -475,5 +506,6 @@
 
   </div>
 </div>
+
 </body>
 </html>

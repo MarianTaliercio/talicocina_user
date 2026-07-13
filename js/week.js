@@ -57,10 +57,16 @@ function renderWeek(){
         <div class="day-name">
           ${day}
           ${isToday ? '<span class="today-label">HOY</span>' : ''}
+          <button class="day-share-icon"
+            onclick="event.stopPropagation();shareDay('${day}')"
+            title="Compartir día"> 
+            <i class="fas fa-share-alt"></i>
+          </button>
         </div>
         ${showCals && dayCal ? `<div class="day-kcal">${dayCal} kcal</div>` : ''}
       </div>
       ${rows}
+      
     </div>`;
   }).join('');
 
@@ -203,3 +209,9 @@ async function comidaguardada() {
   toast('Comida Guardada ✓')
   
 }
+
+// flyer
+function shareDay(day){
+    Flyer.open(day);
+}
+
