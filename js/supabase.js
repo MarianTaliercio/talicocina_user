@@ -46,6 +46,8 @@ function normalizeUser(row){
     ...row,
     personas: row.personas || row.people || 2,
     repetir_comidas: row.repetir_comidas ?? true,
+    avatar: row.avatar || 'chef1.png'
+
   };
 }
 
@@ -96,6 +98,8 @@ async function upsertSupabaseUser(user){
     personas: user.personas || 2,
     status: user.status || 'activo',
     joined: user.joined || new Date().toLocaleDateString('es-AR'),
+    repetir_comidas: user.repetir_comidas ?? true,
+    avatar: user.avatar || 'chef1.png'
   };
 
   const { error } = await window.db

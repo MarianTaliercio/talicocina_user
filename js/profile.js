@@ -39,6 +39,7 @@ function calcProfilePct(){
 
 function renderPerfil(){
   loadProfileIntoForm();
+  updateAvatar();
   const p = currentUser?.plan || 'mensual';
   document.getElementById('subs-label').textContent = `Plan ${p === 'anual' ? 'Anual' : 'Mensual'} activo`;
   const next = new Date();
@@ -57,9 +58,11 @@ async function saveProfile(){
     personas: document.getElementById('pf-personas').value,
     banco: document.getElementById('pf-banco').value,
     password: document.getElementById('pf-password').value,
-    repetir_comidas: currentUser.repetir_comidas
+    repetir_comidas: currentUser.repetir_comidas,
+    avatar: currentUser.avatar
   };
-
+  document.getElementById("bottom-avatar").src =
+    "img/avatars/" + (currentUser.avatar || "chef1.png");
   const { error } = await window.db
     .from('users')
     .update(updated)
@@ -80,7 +83,8 @@ async function saveProfile(){
     'tc_user',
     JSON.stringify(currentUser)
   );
-
+  await upsertSupabaseUser(currentUser);
+  updateAvatar();
   updateProfileHero();
 
   toast('Perfil guardado ✓');
@@ -104,4 +108,49 @@ function setRepeatMeals(valor, guardar = true){
   if(guardar){
     updateProfileHero();
   }
+}
+
+// Avatars
+function updateAvatar(){
+
+    const img=document.getElementById("profile-avatar");
+
+    if(!img) return;
+
+    const avatar=currentUser?.avatar || "chef1.png";
+
+    img.src="img/avatars/"+avatar;
+
+}
+const avatars = [
+    "chef1.png",
+    "chef2.png",
+    "chef3.png",
+    "chef4.png",
+];
+
+function openAvatarPicker(){
+
+    const grid=document.getElementById("avatar-grid");
+
+    grid.innerHTML=avatars.map(a=>`
+
+        <img
+            class="avatar-option ${currentUser.avatar===a?'on':''}"
+            src="img/avatars/${a}"
+            onclick="selectAvatar('${a}')">
+
+    `).join("");
+
+    openMo("mo-avatar");
+
+}
+function selectAvatar(name){
+
+    currentUser.avatar=name;
+
+    updateAvatar();
+
+    closeMo("mo-avatar");
+
 }

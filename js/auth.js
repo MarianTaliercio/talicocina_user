@@ -46,6 +46,7 @@ async function doLogin(){
 
     loadUserScopedState();
     loadProfileIntoForm();
+    updateAvatar();
     enterApp();
 
     btn.disabled = false;
@@ -202,6 +203,7 @@ const regCity = document.getElementById('reg-city').value.trim();
       city: regCity,
       personas: 2,
       banco: '',
+      avatar: 'chef1.png',
       status: 'activo',
       joined: new Date().toLocaleDateString('es-AR')
     };  

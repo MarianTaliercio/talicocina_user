@@ -306,8 +306,7 @@
 <div class="screen" id="screen-perfil">
   <div class="page" style="max-width:680px">
     <div class="profile-hero">
-      <div class="profile-avatar-big" id="profile-avatar">👤</div>
-      <div>
+      <div class="profile-avatar-big" onclick="openAvatarPicker()"><img id="profile-avatar"src="img/avatars/chef1.png"alt="Avatar"></div><div>
         <div class="profile-hero-name" id="profile-hero-name">Tu perfil</div>
         <div class="profile-hero-city" id="profile-hero-city">📍 Sin ciudad</div>
         <div class="profile-pct">
@@ -441,7 +440,7 @@
   <div class="bnav-item on"  id="bn-semana"  onclick="showScreen('semana'); setBottomNav('bn-semana')"><div class="bnav-icon">📅</div><div class="bnav-lbl">Semana</div></div>
   <div class="bnav-item"     id="bn-compras" onclick="showScreen('compras');setBottomNav('bn-compras')"><div class="bnav-icon">🛒</div><div class="bnav-lbl">Compras</div></div>
   <div class="bnav-item"     id="bn-promos"  onclick="showScreen('promos'); setBottomNav('bn-promos')"><div class="bnav-icon">🏦</div><div class="bnav-lbl">Promos</div></div>
-  <div class="bnav-item"     id="bn-perfil"  onclick="showScreen('perfil'); setBottomNav('bn-perfil')"><div class="bnav-icon">👤</div><div class="bnav-lbl">Perfil</div></div>
+  <div class="bnav-item"     id="bn-perfil"  onclick="showScreen('perfil'); setBottomNav('bn-perfil')"><div class="bnav-icon"><img id="bottom-avatar" src="img/avatars/chef1.png" alt="Avatar"></div><div class="bnav-lbl">Perfil</div></div>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -461,6 +460,20 @@
 <script src="js/promos.js"></script>
 <script src="app.js"></script>
 <script src="js/chef-animation.js"></script>
+<div class="modal-overlay" id="mo-avatar" onclick="closeMo('mo-avatar',event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
 
+    <div class="modal-handle"></div>
+
+    <div class="modal-title">Elegí tu avatar</div>
+
+    <div class="avatar-grid" id="avatar-grid"></div>
+
+    <button class="btn btn-outline btn-full" onclick="closeMo('mo-avatar')">
+      Cancelar
+    </button>
+
+  </div>
+</div>
 </body>
 </html>
