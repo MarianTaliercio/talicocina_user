@@ -54,24 +54,35 @@ async function doLogin(){
   }, 900);
 }
 function doLogout(){
+
   if(!confirm('¿Cerrar sesión?')) return;
+
   // Limpiar estado
   currentUser = null;
-  plan        = {};
-  checked     = {};
+  plan = {};
+  checked = {};
+
   localStorage.removeItem('tc_user');
-  // Ocultar nav
-  document.getElementById('topnav').style.display    = 'none';
-  document.getElementById('bottom-nav').style.display= 'none';
-  // Resetear nav links
-  document.querySelectorAll('.nav-link').forEach(l  => l.classList.remove('active'));
+
+  // Ocultar navegación
+  document.getElementById('topnav').style.display = 'none';
+  document.getElementById('bottom-nav').style.display = 'none';
+
+  // Limpiar navegación
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
   document.querySelectorAll('.bnav-item').forEach(i => i.classList.remove('on'));
-  // Resetear formulario login
+
+  // Volver al primer botón del menú inferior
+  document.getElementById('bn-semana')?.classList.add('on');
+
+  // Limpiar login
   document.getElementById('login-email').value = '';
-  document.getElementById('login-pass').value  = '';
-  // Ir a login
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-  document.getElementById('screen-login').classList.add('on');
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').textContent = '';
+
+  // Mostrar pantalla de login
+  showScreen('login');
+
   toast('Sesión cerrada');
 }
 

@@ -11,12 +11,7 @@ function enterApp(){
   renderBankFilter();
   document.getElementById('promo-city-lbl').textContent = `Supermercados en ${currentUser.city||'tu ciudad'} · Esta semana`;
   showScreen('semana');
-  // Escuchar resize para cambiar nav
-  window.addEventListener('resize', () => {
-    const m = window.innerWidth <= 600;
-    document.getElementById('topnav').style.display     = m ? 'none'  : 'block';
-    document.getElementById('bottom-nav').style.display = m ? 'flex'  : 'none';
-  }, { passive:true });
+
 }
 
 function setBottomNav(activeId){
@@ -58,3 +53,24 @@ function showScreen(name, tabEl){
   }
   if(name === 'perfil') renderPerfil();
   if(name === 'semana') renderWeek();}
+window.addEventListener('resize', () => {
+
+  const loginVisible =
+    document.getElementById('screen-login').classList.contains('on') ||
+    document.getElementById('screen-register').classList.contains('on');
+
+  if(loginVisible){
+    document.getElementById('topnav').style.display = 'none';
+    document.getElementById('bottom-nav').style.display = 'none';
+    return;
+  }
+
+  const mobile = window.innerWidth <= 600;
+
+  document.getElementById('topnav').style.display =
+    mobile ? 'none' : 'block';
+
+  document.getElementById('bottom-nav').style.display =
+    mobile ? 'flex' : 'none';
+
+}, { passive: true });
