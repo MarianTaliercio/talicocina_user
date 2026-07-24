@@ -5,7 +5,8 @@
 
 // ── CONSTANTES ──────────────────────────
 const DAYS  = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-const MEALS = ['Almuerzo','Cena'];
+// La base permite una selección activa por fecha.
+const MEALS = ['Almuerzo', 'Cena'];
 const STORES = {
   coto:        { name:'COTO',        color:'#e31e24' },
   toledo:      { name:'Toledo',      color:'#1a5ca8' },
@@ -27,3 +28,5 @@ let showCals    = false;
 let selectedPlan= 'mensual';
 let editKey     = null;
 let bankFilter  = '';
+let selectedWeekDay = null;
+let plannerAnchorDate = null;

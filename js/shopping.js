@@ -11,7 +11,7 @@ function renderCompras(){
 
   // Primero obtener todas las recetas elegidas
   Object.values(plan).forEach(function(rid){
-    var r = recipes.find(function(x){ return x.id === rid; });
+    var r = recipes.find(function(x){ return x.id === recipeIdForPlanValue(rid); });
     if(!r) return;
 
     if(!included.find(function(x){ return x.id === r.id; })){
@@ -39,11 +39,11 @@ function renderCompras(){
   // Ahora generar la lista de ingredientes según el filtro
   Object.values(plan).forEach(function(rid){
 
-    if(compraFiltro !== "todos" && rid !== compraFiltro){
+    if(compraFiltro !== "todos" && recipeIdForPlanValue(rid) !== compraFiltro){
       return;
     }
 
-    var r = recipes.find(function(x){ return x.id === rid; });
+    var r = recipes.find(function(x){ return x.id === recipeIdForPlanValue(rid); });
     if(!r) return;
     if(!r.ingredientes || !r.ingredientes.length) return;
 

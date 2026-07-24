@@ -11,12 +11,12 @@
 /* ── DESIGN TOKENS ── */
 :root {
   /* Brand greens */
-  --g1: #1a3a1a;
-  --g2: #2d5a2d;
-  --g3: #4a8c3f;
-  --g4: #7ec870;
-  --g5: #d4edcc;
-  --g6: #f0f9ec;
+  --g1: #233b30;
+  --g2: #b85a05;
+  --g3: #dd7b1d;
+  --g4: #ffc882;
+  --g5: #fff0de;
+  --g6: #fff8ef;
 
   /* Neutrals */
   --ink:  #1c1c1a;
@@ -24,7 +24,7 @@
   --ink3: #6b6b66;
   --ink4: #a8a8a2;
   --line: #e4e4de;
-  --bg:   #f7f6f2;
+  --bg:   #fcfaf7;
   --white:#ffffff;
 
   /* Accent */
@@ -292,7 +292,7 @@ textarea.form-input { min-height: 100px; resize: vertical; line-height: 1.5; }
 
 .theme-btn{
     margin-left: auto;
-    margin-top: center;
+    margin-top: auto;
 
     width: 46px;
     height: 46px;
@@ -330,7 +330,17 @@ textarea.form-input { min-height: 100px; resize: vertical; line-height: 1.5; }
     --g5:#214021;
     --g6:#173117;
 
+    --g1:#0b251d;
+    --g2:#176b51;
+    --g3:#3fb585;
+    --g4:#79d9a9;
+    --amber:#e2a83b;
+    --blue:#65adff;
+
 }
+
+body { background: radial-gradient(circle at top right, rgba(126, 200, 112, .12), transparent 28rem), var(--bg); }
+[data-theme="dark"] body { background: radial-gradient(circle at top right, rgba(63, 181, 133, .16), transparent 30rem), var(--bg); }
 
 
 
@@ -400,301 +410,5 @@ textarea.form-input { min-height: 100px; resize: vertical; line-height: 1.5; }
     60%{transform:translateX(-8px);}
     80%{transform:translateX(8px);}
     100%{transform:translateX(0);}
-
-}
-
-
-/* Avatars */
-.profile-avatar-big{
-    width:130px;
-    height:130px;
-    border-radius:50%;
-    overflow:hidden;
-    background:#fff;
-    border:4px solid #fff;
-    box-shadow:0 10px 25px rgba(0,0,0,.12);
-    flex-shrink:0;
-}
-
-.profile-avatar-big img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
-.profile-avatar-big:hover{
-    transform:scale(1.05);
-}
-
-.avatar-grid{
-    display:grid;
-    grid-template-columns:repeat(3, 90px);
-    justify-content:center;
-    gap:18px;
-    padding:15px 0;
-}
-
-.avatar-grid .avatar-option{
-    width:90px !important;
-    height:90px !important;
-    min-width:90px;
-    min-height:90px;
-    max-width:90px;
-    max-height:90px;
-
-    border-radius:50%;
-    object-fit:cover;
-    cursor:pointer;
-    border:3px solid transparent;
-    transition:.2s;
-}
-
-.avatar-grid .avatar-option:hover{
-    transform:scale(1.08);
-}
-
-.avatar-grid .avatar-option.on{
-    border-color:var(--g1);
-}
-.bnav-icon img{
-    width:28px;
-    height:28px;
-    border-radius:50%;
-    object-fit:cover;
-}
-
-
-.day-name{
-    display:flex;
-    align-items:center;
-    width: 100%;
-    gap:8px;
-}
-
-.day-share-icon{
-    border:none;
-    background:transparent;
-    color: var(--ink);   
-    cursor:pointer;
-    font-size:16px;
-    padding:0;
-    margin-left:auto;
-    transition:.2s;
-}
-
-.day-share-icon:hover{
-    transform:scale(1.15);
-    color:#ff9800;
-}
-
-/* Modal Flyer */
-
-.flyer-modal{
-    width:min(95vw,420px);
-}
-
-#flyer-preview{
-
-    background:#fff;
-
-    border-radius:20px;
-
-    overflow:hidden;
-
-    box-shadow:0 10px 30px rgba(0,0,0,.12);
-
-}
-
-
-
-.flyer-logo{
-
-    font-size:14px;
-
-    font-weight:700;
-
-    letter-spacing:.08em;
-
-    opacity:.9;
-
-}
-
-.flyer-day{
-
-    font-size:34px;
-
-    font-weight:800;
-
-    margin-top:8px;
-
-}
-
-.flyer-meal{
-
-    background:#fff;
-
-    color:#222;
-
-    margin:18px;
-
-    border-radius:18px;
-
-    overflow:hidden;
-
-    box-shadow:0 8px 20px rgba(0,0,0,.18);
-
-}
-
-.flyer-meal-title{
-
-    font-size:12px;
-
-    color:#777;
-
-    text-transform:uppercase;
-
-    margin-bottom:4px;
-
-}
-
-.flyer-meal-name{
-
-    font-size:18px;
-
-    font-weight:700;
-
-}
-
-
-
-.flyer-actions{
-
-    display:flex;
-
-    gap:10px;
-
-    margin-top:18px;
-}
-
-.flyer-actions .btn{
-
-    flex:1;
-}
-
-.flyer-img{
-
-    width:100%;
-
-    height:190px;
-
-    object-fit:cover;
-
-    display:block;
-
-}
-.flyer-header{
-
-    padding:22px;
-
-    text-align:center;
-
-}
-
-
-.flyer-type{
-
-    color:#888;
-
-    font-size:12px;
-
-    text-transform:uppercase;
-
-    letter-spacing:.08em;
-
-    margin-bottom:6px;
-
-}
-
-.flyer-name{
-
-    font-size:22px;
-
-    font-weight:700;
-
-}
-
-.flyer-info{
-
-    display:flex;
-
-    gap:15px;
-
-    margin-top:12px;
-
-    color:#666;
-
-    font-size:14px;
-
-}
-
-.flyer-footer{
-
-    text-align:center;
-
-    margin-top:10px;
-
-    opacity:.85;
-
-    font-size:13px;
-
-}
-.flyer{
-
-    position:relative;
-    overflow:hidden;
-
-    background:linear-gradient(180deg,#FFFDF8,#F7F5EF);
-
-    border-radius:22px;
-
-    color:#222;
-
-    padding-bottom:20px;
-
-}
-
-/* Esquina superior izquierda */
-.flyer::before{
-
-    content:"🥑 🍅 🥬";
-
-    position:absolute;
-
-    top:20px;
-    left:20px;
-
-    font-size:38px;
-
-    opacity:.12;
-
-    transform:rotate(-18deg);
-
-}
-
-/* Esquina inferior derecha */
-.flyer::after{
-
-    content:"🥕 🌶️ 🧄";
-
-    position:absolute;
-
-    bottom:25px;
-    right:20px;
-
-    font-size:40px;
-
-    opacity:.12;
-
-    transform:rotate(15deg);
 
 }

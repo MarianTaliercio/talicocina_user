@@ -6,7 +6,6 @@
 <title>Tali Cocina · App</title>
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="app.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 <body>
 
@@ -63,6 +62,13 @@
       </div>
 
       <div class="auth-body">
+        <div class="login-welcome-panel" id="login-welcome-panel">
+          <div class="welcome-kicker">TU ASISTENTE DE COCINA</div>
+          <h1>¡Hola! Soy Tali,<br><em>tu asistente en la cocina.</em></h1>
+          <p>Organizá tus comidas, armá tu compra y aprovechá beneficios para disfrutar tu semana.</p>
+          <button class="btn btn-primary btn-full" onclick="showScreen('register')">Empezar ahora →</button>
+          <button class="btn btn-outline btn-full" onclick="showLoginForm()">Iniciar sesión</button>
+        </div>
 
         <div class="form-group">
           <label class="form-label">Email</label>
@@ -147,6 +153,14 @@
 
         <!-- Paso 1: Datos personales -->
         <div id="reg-step-1">
+          <div class="referral-callout">
+            <div class="referral-callout-title">Llegaste por un profesional o beneficio?</div>
+            <div class="form-hint">Ingresa el codigo para recibir tu plan Premium y, si corresponde, recetas seleccionadas para vos.</div>
+            <div class="form-row" style="margin-top:.65rem">
+              <div class="form-group"><label class="form-label">Como nos conociste</label><select class="form-input" id="reg-ref-source"><option value="">No tengo codigo</option><option value="professional">Profesional</option><option value="benefit">Beneficio / descuento</option></select></div>
+              <div class="form-group"><label class="form-label">Codigo</label><input class="form-input" id="reg-ref-code" placeholder="Ej: NUTRI-ANA" style="text-transform:uppercase"></div>
+            </div>
+          </div>
           <div class="form-row">
             <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="reg-name" placeholder="Tu nombre"></div>
             <div class="form-group"><label class="form-label">Apellido</label><input class="form-input" id="reg-apellido" placeholder="Tu apellido"></div>
@@ -175,6 +189,10 @@
         <div id="reg-step-2" style="display:none">
           <p style="font-size:14px;color:var(--ink2);margin-bottom:1rem;line-height:1.6">Elegí el plan que más te conviene. Podés cancelar cuando quieras.</p>
           <div class="plan-grid">
+            <div class="plan-card" id="plan-gratuito" onclick="selectPlan('gratuito')">
+              <div class="plan-name">Gratuito</div><div class="plan-price">$0</div><div class="plan-per">para empezar</div>
+              <div class="plan-features"><div class="plan-feat">Recetas esenciales</div><div class="plan-feat">Lista de compras</div></div>
+            </div>
             <div class="plan-card selected" id="plan-mensual" onclick="selectPlan('mensual')">
               <div class="plan-popular">+ popular</div>
               <div class="plan-name">Mensual</div>
@@ -188,7 +206,7 @@
               </div>
             </div>
             <div class="plan-card" id="plan-anual" onclick="selectPlan('anual')">
-              <div class="plan-name">Anual</div>
+              <div class="plan-name">Premium</div>
               <div class="plan-price">$16.900</div>
               <div class="plan-per">por año · 2 meses gratis</div>
               <div class="plan-features">
@@ -269,7 +287,6 @@
       <span style="font-size:13px;color:var(--ink2)">Mostrar calorías</span>
     </label>
     <div id="week-body"></div>  
-    <button class="btn btn-primary btn-full" onclick="comidaguardada()" style="margin-bottom:.75rem">Guardar comida</button>
 
   </div>
 
@@ -307,7 +324,8 @@
 <div class="screen" id="screen-perfil">
   <div class="page" style="max-width:680px">
     <div class="profile-hero">
-      <div class="profile-avatar-big" onclick="openAvatarPicker()"><img id="profile-avatar"src="img/avatars/chef1.png"alt="Avatar"></div><div>
+      <div class="profile-avatar-big" id="profile-avatar">👤</div>
+      <div>
         <div class="profile-hero-name" id="profile-hero-name">Tu perfil</div>
         <div class="profile-hero-city" id="profile-hero-city">📍 Sin ciudad</div>
         <div class="profile-pct">
@@ -328,6 +346,15 @@
     </div>
     <div class="card">
       <div style="font-size:16px;font-weight:500;margin-bottom:1rem">Datos personales</div>
+      <div class="avatar-picker-section">
+        <div class="avatar-picker-head"><div><div class="avatar-picker-title">Tu avatar</div><div class="form-hint">Elegí el personaje que te representa</div></div><span class="personalize-badge">Personalizable</span></div>
+        <div class="avatar-picker" id="avatar-picker">
+          <button type="button" class="avatar-option" data-avatar="img/avatars/chef1.png" onclick="chooseAvatar(this.dataset.avatar)" aria-label="Elegir avatar 1"><img src="img/avatars/chef1.png" alt="Avatar 1"></button>
+          <button type="button" class="avatar-option" data-avatar="img/avatars/chef2.png" onclick="chooseAvatar(this.dataset.avatar)" aria-label="Elegir avatar 2"><img src="img/avatars/chef2.png" alt="Avatar 2"></button>
+          <button type="button" class="avatar-option" data-avatar="img/avatars/chef3.png" onclick="chooseAvatar(this.dataset.avatar)" aria-label="Elegir avatar 3"><img src="img/avatars/chef3.png" alt="Avatar 3"></button>
+          <button type="button" class="avatar-option" data-avatar="img/avatars/chef4.png" onclick="chooseAvatar(this.dataset.avatar)" aria-label="Elegir avatar 4"><img src="img/avatars/chef4.png" alt="Avatar 4"></button>
+        </div>
+      </div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="pf-name" placeholder="Tu nombre" oninput="updateProfileHero()"></div>
         <div class="form-group"><label class="form-label">Apellido</label><input class="form-input" id="pf-apellido" placeholder="Tu apellido"></div>
@@ -415,35 +442,7 @@
     <button class="btn btn-outline btn-full" onclick="closeMo('mo-pick')">Cancelar</button>
   </div>
 </div>
-<!-- ── MODAL FLYER ───────────────────────────── -->
-<div class="modal-overlay" id="mo-flyer" onclick="closeMo('mo-flyer',event)">
-  <div class="modal-sheet flyer-modal" onclick="event.stopPropagation()">
 
-    <div class="modal-handle"></div>
-
-    <div class="modal-title">
-      Compartir menú
-    </div>
-
-    <div id="flyer-preview"></div>
-
-    <div class="flyer-actions">
-      <button class="btn btn-outline" onclick="Flyer.download()">
-        Descargar
-      </button>
-
-      <button class="btn btn-primary" onclick="Flyer.share()">
-        Compartir
-      </button>
-    </div>
-
-    <button class="btn btn-outline btn-full"
-            onclick="closeMo('mo-flyer')">
-      Cerrar
-    </button>
-
-  </div>
-</div>
 <!-- ══ MODAL: Detalle receta ══ -->
 <div class="modal-overlay" id="mo-detail" onclick="closeMo('mo-detail',event)">
   <div class="modal-sheet" onclick="event.stopPropagation()">
@@ -469,7 +468,7 @@
   <div class="bnav-item on"  id="bn-semana"  onclick="showScreen('semana'); setBottomNav('bn-semana')"><div class="bnav-icon">📅</div><div class="bnav-lbl">Semana</div></div>
   <div class="bnav-item"     id="bn-compras" onclick="showScreen('compras');setBottomNav('bn-compras')"><div class="bnav-icon">🛒</div><div class="bnav-lbl">Compras</div></div>
   <div class="bnav-item"     id="bn-promos"  onclick="showScreen('promos'); setBottomNav('bn-promos')"><div class="bnav-icon">🏦</div><div class="bnav-lbl">Promos</div></div>
-  <div class="bnav-item"     id="bn-perfil"  onclick="showScreen('perfil'); setBottomNav('bn-perfil')"><div class="bnav-icon"><img id="bottom-avatar" src="img/avatars/chef1.png" alt="Avatar"></div><div class="bnav-lbl">Perfil</div></div>
+  <div class="bnav-item"     id="bn-perfil"  onclick="showScreen('perfil'); setBottomNav('bn-perfil')"><div class="bnav-icon bnav-avatar" id="bnav-profile-avatar">👤</div><div class="bnav-lbl">Perfil</div></div>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -488,24 +487,7 @@
 <script src="js/shopping.js"></script>
 <script src="js/promos.js"></script>
 <script src="app.js"></script>
-<script src="js/chef-animation.js"></script>\
-<script src="js/flyer.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<div class="modal-overlay" id="mo-avatar" onclick="closeMo('mo-avatar',event)">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-
-    <div class="modal-handle"></div>
-
-    <div class="modal-title">Elegí tu avatar</div>
-
-    <div class="avatar-grid" id="avatar-grid"></div>
-
-    <button class="btn btn-outline btn-full" onclick="closeMo('mo-avatar')">
-      Cancelar
-    </button>
-
-  </div>
-</div>
+<script src="js/chef-animation.js"></script>
 
 </body>
 </html>

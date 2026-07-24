@@ -5,9 +5,17 @@
 
 async function bootstrapApp(){
   await loadSupabaseData();
-
-  syncCurrentUserFromUsers();
-  loadUserScopedState();
+  await loadRegistrationPlans();
+  currentUser = await getCurrentProfile();
+  if (!currentUser) {
+    const { data: { user } } = await window.db.auth.getUser();
+    if (user) currentUser = await ensureUserProfile(user, user.user_metadata || {});
+  }
+  if (currentUser) {
+    await loadProfessionalRecipes();
+    localStorage.setItem('tc_user', JSON.stringify(currentUser));
+    await loadUserSelections();
+  }
 }
 
 window.addEventListener('storage', e => {
@@ -31,27 +39,11 @@ window.addEventListener('storage', e => {
       localStorage.removeItem('tc_wa_notify');
     }
   }
-  if(e.key === 'tc_users' && currentUser){
-    const wasSynced = syncCurrentUserFromUsers();
-    if(!wasSynced || currentUser.status === 'inactivo' || currentUser.plan === 'inactivo'){
-      toast('Tu usuario fue actualizado por el admin');
-      currentUser = null;
-      localStorage.removeItem('tc_user');
-      showScreen('login');
-      return;
-    }
-    loadProfileIntoForm();
-    updateProfileHero();
-    renderWeek();
-    if(document.getElementById('screen-perfil')?.classList.contains('on')) renderPerfil();
-  }
 });
 
 window.addEventListener('load', async () => {
   await bootstrapApp();
-  syncCurrentUserFromUsers();
-  if(currentUser && currentUser.status !== 'inactivo' && currentUser.plan !== 'inactivo'){
-    loadUserScopedState();
+  if(currentUser){
     loadProfileIntoForm();
     enterApp();
   } else {
@@ -72,6 +64,9 @@ function setTheme(theme){
     document.documentElement.setAttribute("data-theme", theme);
 
     localStorage.setItem("tc_theme", theme);
+
+    const button = document.querySelector('.theme-btn');
+    if (button) { button.textContent = theme === 'dark' ? '☀️' : '🌙'; button.setAttribute('aria-label', theme === 'dark' ? 'Activar modo día' : 'Activar modo noche'); }
 
 }
 

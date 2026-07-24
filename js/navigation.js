@@ -4,8 +4,8 @@ function enterApp(){
   const isMobile = window.innerWidth <= 600;
   document.getElementById('topnav').style.display     = isMobile ? 'none'  : 'block';
   document.getElementById('bottom-nav').style.display = isMobile ? 'flex'  : 'none';
-  document.getElementById('nav-avatar').textContent   = (currentUser.name||'U').slice(0,2).toUpperCase();
-  document.getElementById('nav-plan-badge').textContent = (currentUser.plan === 'anual') ? 'Anual' : 'Mensual';
+  if (typeof paintAvatar === 'function') paintAvatar();
+  document.getElementById('nav-plan-badge').textContent = 'Mi cuenta';
   updateWeekDateLabel();
   renderWeek();
   renderBankFilter();

@@ -1,226 +1,99 @@
-// ── AUTH ─────────────────────────────────
-async function doLogin(){
-
-  const btn = document.getElementById('login-btn');
+async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-
-  if(!email || !pass){
-    showErr('login-error','Completá todos los campos.');
-    return;
-  }
-
-  const { data: user, error } = await window.db
-    .from('users')
-    .select('*')
-    .eq('email', email)
-    .single();
-
-  if(error || !user){
-    showErr('login-error','El usuario no existe.');
-    return;
-  }
-
-  if((user.password || '') !== pass){
-    showErr('login-error','La contraseña no es correcta.');
-    return;
-  }
-
-  if(user.status === 'inactivo' || user.plan === 'inactivo'){
-    showErr('login-error','Este usuario está inactivo.');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>';
-
-  setTimeout(() => {
-
-    currentUser = {
-      personas: 2,
-      ...user,
-      personas: user.personas || 2
-    };
-
-    localStorage.setItem('tc_user', JSON.stringify(currentUser));
-
-    loadUserScopedState();
-    loadProfileIntoForm();
-    updateAvatar();
-    enterApp();
-
-    btn.disabled = false;
-    btn.textContent = 'Ingresar';
-
-  }, 900);
+  const password = document.getElementById('login-pass').value;
+  if (!email || !password) return showErr('login-error', 'Completá todos los campos.');
+  const button = document.getElementById('login-btn'); button.disabled = true; button.innerHTML = '<span class="spinner"></span>';
+  const { data, error } = await window.db.auth.signInWithPassword({ email, password });
+  button.disabled = false; button.textContent = 'Ingresar';
+  if (error || !data.user) return showErr('login-error', error?.code === 'email_not_confirmed' ? 'Confirmá el email de registro antes de ingresar.' : (error?.message || 'Email o contraseña incorrectos.'));
+  try {
+    currentUser = await getCurrentProfile() || await ensureUserProfile(data.user, data.user.user_metadata || {});
+    await applySelectedPlan(data.user.user_metadata?.selectedPlan || '');
+    await redeemReferralForCurrentUser(data.user.user_metadata?.referralCode || '');
+    await loadProfessionalRecipes(); localStorage.setItem('tc_user', JSON.stringify(currentUser)); await loadUserSelections(); loadProfileIntoForm(); enterApp();
+  } catch (profileError) { console.error(profileError); showErr('login-error', `No se pudo cargar tu perfil: ${profileError.message || 'revisá las políticas RLS'}`); }
 }
-function doLogout(){
-
-  if(!confirm('¿Cerrar sesión?')) return;
-
-  // Limpiar estado
-  currentUser = null;
-  plan = {};
-  checked = {};
-
-  localStorage.removeItem('tc_user');
-
-  // Ocultar navegación
-  document.getElementById('topnav').style.display = 'none';
-  document.getElementById('bottom-nav').style.display = 'none';
-
-  // Limpiar navegación
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  document.querySelectorAll('.bnav-item').forEach(i => i.classList.remove('on'));
-
-  // Volver al primer botón del menú inferior
-  document.getElementById('bn-semana')?.classList.add('on');
-
-  // Limpiar login
-  document.getElementById('login-email').value = '';
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-error').textContent = '';
-
-  // Mostrar pantalla de login
-  showScreen('login');
-
-  toast('Sesión cerrada');
+function showLoginForm() { document.getElementById('login-welcome-panel')?.classList.add('hidden'); }
+async function doLogout() { if (!confirm('¿Cerrar sesión?')) return; await window.db.auth.signOut(); currentUser = null; plan = {}; checked = {}; localStorage.removeItem('tc_user'); showScreen('login'); toast('Sesión cerrada'); }
+function showErr(id, message) { const element = document.getElementById(id); element.textContent = message; element.classList.add('show'); setTimeout(() => element.classList.remove('show'), 5000); }
+async function redeemReferralForCurrentUser(code) {
+  if (!code) return;
+  const { data, error } = await window.db.rpc('redeem_referral_code', { input_code: code });
+  if (error) { console.warn('No se pudo aplicar el codigo', error.message); return; }
+  if (data?.applied) toast(`Codigo aplicado: plan Premium por ${data.owner}`);
+}
+async function applySelectedPlan(selected) {
+  const planName = { gratuito: 'Gratuito', mensual: 'Plus', anual: 'Premium' }[selected];
+  if (!planName) return;
+  const { error } = await window.db.rpc('assign_signup_plan', { plan_name_input: planName });
+  if (error) console.warn('No se pudo asignar el plan', error.message);
 }
 
-function showErr(id, msg){
-  const el = document.getElementById(id);
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
-function validateRegisterStep1(){
-
-  const regName = document.getElementById('reg-name').value.trim();
-  const regApellido = document.getElementById('reg-apellido').value.trim();
-  const regEmail = document.getElementById('reg-email').value.trim();
-  const regPass = document.getElementById('reg-pass').value;
-  const regWapp = document.getElementById('reg-wapp').value.trim();
-  const regCity = document.getElementById('reg-city').value.trim();
-
-  // Campos obligatorios
-  if(!regName || !regApellido || !regEmail || !regPass || !regWapp || !regCity){
-    toast("Completá todos los campos.");
-    return;
+async function validateRegisterStep1() {
+  const fields = ['reg-name', 'reg-apellido', 'reg-email', 'reg-pass', 'reg-wapp', 'reg-city'];
+  if (fields.some(id => !document.getElementById(id).value.trim())) return toast('Completa todos los campos.');
+  const email = document.getElementById('reg-email').value.trim(); const password = document.getElementById('reg-pass').value;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast('Ingresa un email valido.');
+  if (password.includes(' ') || password.length < 8) return toast('La contrasena debe tener al menos 8 caracteres y no incluir espacios.');
+  const code = document.getElementById('reg-ref-code')?.value.trim().toUpperCase() || '';
+  const source = document.getElementById('reg-ref-source')?.value || '';
+  if (source && !code) return toast('Ingresa el codigo del profesional o beneficio.');
+  if (code) {
+    const { data, error } = await window.db.rpc('validate_referral_code', { input_code: code });
+    if (error) return toast('No se pudo validar el codigo. Ejecuta validate-referral-code.sql en Supabase.');
+    if (!data?.valid) return toast(data?.message || 'El codigo no es valido.');
+    toast(`Codigo valido: ${data.owner}. Tendras acceso Premium.`);
   }
-
-  // Email válido (sin espacios)
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if(!emailRegex.test(regEmail)){
-    toast("Ingresá un correo electrónico válido.");
-    return;
-  }
-
-  // Contraseña
-  if (regPass.includes(" ")) {
-    toast("La contraseña no puede contener espacios.");
-    return;}
-  if(regPass.length < 8){
-    toast("La contraseña debe tener al menos 8 caracteres.");
-    return;
-  }
-
-  // Todo correcto
   regStep(2);
 }
-
-// ── REGISTRO ─────────────────────────────
-function regStep(n){
-  [1,2,3].forEach(i => {
-    document.getElementById('reg-step-'+i).style.display = i === n ? 'block' : 'none';
+function validateRegisterStep1Legacy() {
+  const fields = ['reg-name', 'reg-apellido', 'reg-email', 'reg-pass', 'reg-wapp', 'reg-city'];
+  if (fields.some(id => !document.getElementById(id).value.trim())) return toast('Completá todos los campos.');
+  const email = document.getElementById('reg-email').value.trim(); const password = document.getElementById('reg-pass').value;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return toast('Ingresá un correo electrónico válido.');
+  if (password.includes(' ') || password.length < 8) return toast('La contraseña debe tener al menos 8 caracteres y no incluir espacios.');
+  regStep(2);
+}
+function regStep(number) { [1,2,3].forEach(step => document.getElementById(`reg-step-${step}`).style.display = step === number ? 'block' : 'none'); document.querySelectorAll('#reg-steps .step-dot').forEach((dot, index) => dot.className = `step-dot${index < number - 1 ? ' done' : index === number - 1 ? ' on' : ''}`); }
+function selectPlan(planName) { selectedPlan = planName; document.getElementById('plan-gratuito').classList.toggle('selected', planName === 'gratuito'); document.getElementById('plan-mensual').classList.toggle('selected', planName === 'mensual'); document.getElementById('plan-anual').classList.toggle('selected', planName === 'anual'); }
+function formatCC(element) { const value = element.value.replace(/\D/g, '').slice(0, 16); element.value = value.replace(/(.{4})/g, '$1 ').trim(); document.getElementById('cc-display').textContent = value.padEnd(16, '•').replace(/(.{4})/g, '$1 ').trim(); }
+function formatExp(element) { let value = element.value.replace(/\D/g, ''); if (value.length >= 2) value = `${value.slice(0,2)}/${value.slice(2,4)}`; element.value = value; document.getElementById('cc-exp-display').textContent = value || 'MM/AA'; }
+async function doPayment() {
+  const required = selectedPlan === 'gratuito' ? [] : ['cc-number', 'cc-name', 'cc-exp', 'cc-cvv'];
+  if (required.some(id => !document.getElementById(id).value.trim())) return toast('Completá los datos de pago.');
+  const values = { name: document.getElementById('reg-name').value.trim(), apellido: document.getElementById('reg-apellido').value.trim(), email: document.getElementById('reg-email').value.trim(), password: document.getElementById('reg-pass').value, whatsapp: document.getElementById('reg-wapp').value.trim(), city: document.getElementById('reg-city').value.trim(), personas: 2, selectedPlan, referralCode: document.getElementById('reg-ref-code')?.value.trim().toUpperCase() || '', referralSource: document.getElementById('reg-ref-source')?.value || '' };
+  localStorage.setItem('tc_pending_profile', JSON.stringify({ name: values.name, apellido: values.apellido, email: values.email, whatsapp: values.whatsapp, city: values.city, personas: values.personas, repetir_comidas: false, selectedPlan: values.selectedPlan, referralCode: values.referralCode, referralSource: values.referralSource }));
+  const { data, error } = await window.db.auth.signUp({
+    email: values.email, password: values.password,
+    options: {
+      emailRedirectTo: `${window.location.origin}${window.location.pathname}`,
+      data: { name: values.name, apellido: values.apellido, whatsapp: values.whatsapp, city: values.city, personas: values.personas, repetir_comidas: false, selectedPlan: values.selectedPlan, referralCode: values.referralCode, referralSource: values.referralSource }
+    }
   });
-  const dots = document.querySelectorAll('#reg-steps .step-dot');
-  dots.forEach((d,i) => {
-    d.classList.remove('on','done');
-    if(i < n-1) d.classList.add('done');
-    else if(i === n-1) d.classList.add('on');
-  });
-}
-
-function selectPlan(p){
-  selectedPlan = p;
-  document.getElementById('plan-mensual').classList.toggle('selected', p === 'mensual');
-  document.getElementById('plan-anual').classList.toggle('selected',   p === 'anual');
-}
-
-// ── TARJETA DE CRÉDITO ────────────────────
-function formatCC(el){
-  let v = el.value.replace(/\D/g,'').slice(0,16);
-  el.value = v.replace(/(.{4})/g,'$1 ').trim();
-  const display = v.padEnd(16,'•').replace(/(.{4})/g,'$1 ').trim();
-  document.getElementById('cc-display').textContent = display;
-  const b = v.startsWith('4')?'🔵 VISA': v.startsWith('5')?'🔴 MC': v.startsWith('3')?'🟢 AMEX':'💳';
-  document.getElementById('cc-brand').textContent = b;
-}
-function formatExp(el){
-  let v = el.value.replace(/\D/g,'');
-  if(v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2,4);
-  el.value = v;
-  document.getElementById('cc-exp-display').textContent = v || 'MM/AA';
-}
-
-function doPayment(){
-  const num  = document.getElementById('cc-number').value.replace(/\s/g,'');
-  const name = document.getElementById('cc-name').value.trim();
-  const exp  = document.getElementById('cc-exp').value;
-  const cvv  = document.getElementById('cc-cvv').value;
-  if(num.length < 16 || !name || exp.length < 5 || cvv.length < 3){
-    toast('Completá todos los datos de la tarjeta'); return;
+  if (error || !data.user) {
+    console.error('Error de registro:', error);
+    const message = error?.code === 'over_email_send_rate_limit' || error?.status === 429 ? 'Supabase limitó temporalmente los emails de registro. Esperá y revisá Authentication → Rate Limits.' : (error?.message || 'No se pudo crear la cuenta.');
+    return toast(message);
   }
-  const btn = document.getElementById('pay-btn');
-  btn.disabled = true;
-  document.getElementById('pay-btn-txt').innerHTML = '<span class="spinner"></span> Procesando…';
-  setTimeout(async () => {
-    btn.disabled = false;
-    document.getElementById('pay-btn-txt').textContent = 'Confirmar suscripción';
-const regName = document.getElementById('reg-name').value.trim();
-const regApellido = document.getElementById('reg-apellido').value.trim();
-const regEmail = document.getElementById('reg-email').value.trim();
-const regPass = document.getElementById('reg-pass').value;
-const regWapp = document.getElementById('reg-wapp').value.trim();
-const regCity = document.getElementById('reg-city').value.trim();
-
-   const { data: existingUser } = await window.db
-  .from('users')
-  .select('id,email')
-  .eq('email', regEmail)
-  .maybeSingle();
-
-
-    const data = {
-      id: existingUser?.id || uid(),
-      name: regName,
-      apellido: regApellido,
-      email: regEmail,
-      password: regPass,
-      plan: selectedPlan,
-      wapp: regWapp,
-      city: regCity,
-      personas: 2,
-      banco: '',
-      avatar: 'chef1.png',
-      status: 'activo',
-      joined: new Date().toLocaleDateString('es-AR')
-    };  
-    console.log('Registrando usuario:', data);
-    try { await upsertSupabaseUser(data); }
-    catch(err){console.error('ERROR REGISTRO:', err);toast('Usuario guardado localmente. No se pudo sincronizar con Supabase.');}
-    currentUser = data;
-    localStorage.setItem('tc_user', JSON.stringify(currentUser));
-    loadUserScopedState();
-    loadProfileIntoForm();
-    // Mostrar WA preview en modal de éxito
-    const msg = buildWAMessage(currentUser.name);
-    document.getElementById('wa-preview-success').innerHTML = buildWAPreview(msg);
-    openMo('mo-payment-success');
-  }, 2000);
+  if (!data.session) { toast('Cuenta creada. Confirmá el email que te enviamos y luego iniciá sesión.'); showScreen('login'); return; }
+  try { currentUser = await ensureUserProfile(data.user, values); await applySelectedPlan(values.selectedPlan); await redeemReferralForCurrentUser(values.referralCode); await loadProfessionalRecipes(); localStorage.setItem('tc_user', JSON.stringify(currentUser)); await loadUserSelections(); openMo('mo-payment-success'); }
+  catch (profileError) { console.error(profileError); toast(`La cuenta fue creada, pero no se pudo guardar el perfil: ${profileError.message || 'revisá las políticas RLS'}`); }
 }
 
+async function resendConfirmationEmail() {
+  const email = document.getElementById('login-email').value.trim() || document.getElementById('reg-email').value.trim();
+  if (!email) return showErr('login-error', 'IngresÃ¡ tu email para reenviar la confirmaciÃ³n.');
+  const { error } = await window.db.auth.resend({ type: 'signup', email, options: { emailRedirectTo: `${window.location.origin}${window.location.pathname}` } });
+  if (error) return showErr('login-error', error.message || 'No se pudo reenviar el correo.');
+  showErr('login-error', 'Te enviamos un nuevo correo de confirmaciÃ³n. RevisÃ¡ Spam tambiÃ©n.');
+}
 
-
-
+document.addEventListener('DOMContentLoaded', () => {
+  const body = document.querySelector('#screen-login .auth-body');
+  if (!body || document.getElementById('resend-confirmation-link')) return;
+  const footer = document.createElement('div');
+  footer.className = 'auth-footer';
+  footer.innerHTML = '<a href="#" id="resend-confirmation-link">Reenviar correo de confirmacion</a>';
+  footer.querySelector('a').addEventListener('click', event => { event.preventDefault(); resendConfirmationEmail(); });
+  body.appendChild(footer);
+});
