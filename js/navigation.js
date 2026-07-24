@@ -9,7 +9,7 @@ function enterApp(){
   updateWeekDateLabel();
   renderWeek();
   renderBankFilter();
-  document.getElementById('promo-city-lbl').textContent = `Supermercados en ${currentUser.city||'tu ciudad'} · Esta semana`;
+  document.getElementById('promo-city-lbl').textContent = `Comercios en ${currentUser.city||'tu ciudad'} · Esta semana`;
   showScreen('semana');
 
 }

@@ -149,6 +149,7 @@
           <div class="step-dot on"></div>
           <div class="step-dot"></div>
           <div class="step-dot"></div>
+          <div class="step-dot"></div>
         </div>
 
         <!-- Paso 1: Datos personales -->
@@ -157,8 +158,8 @@
             <div class="referral-callout-title">Llegaste por un profesional o beneficio?</div>
             <div class="form-hint">Ingresa el codigo para recibir tu plan Premium y, si corresponde, recetas seleccionadas para vos.</div>
             <div class="form-row" style="margin-top:.65rem">
-              <div class="form-group"><label class="form-label">Como nos conociste</label><select class="form-input" id="reg-ref-source"><option value="">No tengo codigo</option><option value="professional">Profesional</option><option value="benefit">Beneficio / descuento</option></select></div>
-              <div class="form-group"><label class="form-label">Codigo</label><input class="form-input" id="reg-ref-code" placeholder="Ej: NUTRI-ANA" style="text-transform:uppercase"></div>
+              <div class="form-group"><label class="form-label">Como nos conociste</label><select class="form-input" id="reg-ref-source" onchange="handleReferralSourceChange()"><option value="">No tengo codigo</option><option value="professional">Profesional</option><option value="benefit">Beneficio / descuento</option></select></div>
+              <div class="form-group"><label class="form-label">Codigo</label><input class="form-input" id="reg-ref-code" placeholder="Ej: NUTRI-ANA" style="text-transform:uppercase" oninput="invalidateReferralBenefit()"></div>
             </div>
           </div>
           <div class="form-row">
@@ -176,7 +177,7 @@
 
 
 
-          <div class="form-group"><label class="form-label">Ciudad</label><input class="form-input" id="reg-city" placeholder="Ej: Mar del Plata"></div>
+          <div class="form-group"><label class="form-label">Ciudad</label><input class="form-input city-input" id="reg-city" list="reg-city-options" placeholder="Escribí y elegí una localidad" required><datalist id="reg-city-options"></datalist><div class="form-hint">Seleccioná una localidad argentina verificada.</div></div>
           
           
           
@@ -185,8 +186,30 @@
           <button class="btn btn-primary btn-full" onclick="validateRegisterStep1()">Continuar →</button>
         </div>
 
-        <!-- Paso 2: Plan -->
+        <!-- Paso 2: Perfil alimentario -->
         <div id="reg-step-2" style="display:none">
+          <p style="font-size:14px;color:var(--ink2);margin-bottom:1rem;line-height:1.6">Personalizá las recetas según tu alimentación. Podés modificarlo después desde tu perfil.</p>
+          <div class="plan-grid">
+            <div class="plan-card registration-food-card">
+              <div class="plan-name">Alergias o intolerancias</div>
+              <div class="plan-per">Marcá únicamente las que tengas</div>
+              <div class="chips-row" id="reg-allergies" style="margin-top:1rem"></div>
+              <div class="form-hint" style="margin-top:.75rem">Si no sos alérgico, dejá todo sin seleccionar.</div>
+            </div>
+            <div class="plan-card registration-food-card">
+              <div class="plan-name">Preferencia alimentaria</div>
+              <div class="plan-per">Podés marcar todas las opciones que correspondan</div>
+              <div class="chips-row" id="reg-preferences" style="margin-top:1rem"></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1rem">
+            <button class="btn btn-outline" onclick="regStep(1)">← Atrás</button>
+            <button class="btn btn-primary" onclick="regStep(3)">Continuar →</button>
+          </div>
+        </div>
+
+        <!-- Paso 3: Plan -->
+        <div id="reg-step-3" style="display:none">
           <p style="font-size:14px;color:var(--ink2);margin-bottom:1rem;line-height:1.6">Elegí el plan que más te conviene. Podés cancelar cuando quieras.</p>
           <div class="plan-grid">
             <div class="plan-card" id="plan-gratuito" onclick="selectPlan('gratuito')">
@@ -214,6 +237,7 @@
                 <div class="plan-feat">2 meses gratis</div>
                 <div class="plan-feat">Prioridad en soporte</div>
               </div>
+              <div class="referral-price-note" id="referral-price-note"></div>
             </div>
           </div>
           <div class="mp-strip">
@@ -221,13 +245,13 @@
             <span class="mp-logo">MercadoPago</span>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1rem">
-            <button class="btn btn-outline" onclick="regStep(1)">← Atrás</button>
-            <button class="btn btn-primary" onclick="regStep(3)">Continuar →</button>
+            <button class="btn btn-outline" onclick="regStep(2)">← Atrás</button>
+            <button class="btn btn-primary" onclick="regStep(4)">Continuar →</button>
           </div>
         </div>
 
-        <!-- Paso 3: Tarjeta -->
-        <div id="reg-step-3" style="display:none">
+        <!-- Paso 4: Tarjeta -->
+        <div id="reg-step-4" style="display:none">
           <div class="cc-visual" id="cc-visual">
             <div class="cc-chip"></div>
             <div class="cc-number" id="cc-display">•••• •••• •••• ••••</div>
@@ -253,7 +277,7 @@
             <span>🔒</span><span>Tus datos están protegidos. Esta es una simulación — no se cobra nada real.</span>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <button class="btn btn-outline" onclick="regStep(2)">← Atrás</button>
+            <button class="btn btn-outline" onclick="regStep(3)">← Atrás</button>
             <button class="btn btn-primary" id="pay-btn" onclick="doPayment()">
               <span id="pay-btn-txt">Confirmar suscripción</span>
             </button>
@@ -367,7 +391,7 @@
         <div class="form-hint">Para recibir las recetas semanales</div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Ciudad</label><input class="form-input" id="pf-city" placeholder="Ej: Mar del Plata" oninput="updateProfileHero()"></div>
+        <div class="form-group"><label class="form-label">Ciudad</label><input class="form-input city-input" id="pf-city" list="pf-city-options" placeholder="Escribí y elegí una localidad" oninput="updateProfileHero()"><datalist id="pf-city-options"></datalist><div class="form-hint">Seleccioná una localidad argentina verificada.</div></div>
         <div class="form-group">
           <label class="form-label">Personas en el hogar</label>
           <select class="form-input" id="pf-personas">
@@ -395,15 +419,17 @@
       </button>
     </div>
 </div>
+      <div class="form-group" id="recipe-catalog-setting" style="display:none">
+        <label class="form-label">Recetas disponibles</label>
+        <div class="chips">
+          <button type="button" class="chip" id="catalog-professional" onclick="setRecipeCatalogMode('professional')">De mi nutricionista</button>
+          <button type="button" class="chip" id="catalog-all" onclick="setRecipeCatalogMode('all')">Todas las recetas</button>
+        </div>
+        <div class="form-hint" id="recipe-catalog-hint"></div>
+      </div>
       <div class="form-group">
         <label class="form-label">Banco principal</label>
-        <select class="form-input" id="pf-banco">
-          <option value="">Sin preferencia</option>
-          <option>Banco Nación</option><option>Banco Provincia</option><option>Santander</option>
-          <option>BBVA</option><option>HSBC</option><option>Galicia</option><option>Macro</option>
-          <option>ICBC</option><option>Patagonia</option><option>Naranja X</option>
-          <option>Mercado Pago</option><option>MODO</option>
-        </select>
+        <select class="form-input" id="pf-banco"><option value="">Sin preferencia</option></select>
       </div>
     </div>
     <div class="card">
@@ -419,17 +445,42 @@
     </div>
     <div class="card">
       <div style="font-size:16px;font-weight:500;margin-bottom:.75rem">Preferencias alimentarias</div>
+      <div style="font-size:13px;color:var(--ink2);margin-bottom:.75rem">Podés marcar varias opciones.</div>
       <div class="chips-row" id="pref-chips">
-        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Omnívoro</div>
-        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Vegetariano</div>
-        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Vegano</div>
-        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Low carb</div>
-        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Sin azúcar</div>
-        <div class="chip" onclick="togChipSingle(this,'pref-chips')">Alta proteína</div>
+        <div class="chip" onclick="togChip(this)">Omnívoro</div>
+        <div class="chip" onclick="togChip(this)">Vegetariano</div>
+        <div class="chip" onclick="togChip(this)">Vegano</div>
+        <div class="chip" onclick="togChip(this)">Low carb</div>
+        <div class="chip" onclick="togChip(this)">Sin azúcar</div>
+        <div class="chip" onclick="togChip(this)">Alta proteína</div>
       </div>
     </div>
     <button class="btn btn-primary btn-full" onclick="saveProfile()" style="margin-bottom:.75rem">Guardar cambios</button>
     <button class="btn btn-outline btn-full" onclick="doLogout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: Recuperar contraseña ══ -->
+<div class="modal-overlay recovery-overlay" id="mo-password-recovery" onclick="closeMo('mo-password-recovery',event)">
+  <div class="modal-sheet recovery-card" onclick="event.stopPropagation()">
+    <button class="recovery-close" type="button" aria-label="Cerrar" onclick="closeMo('mo-password-recovery')">×</button>
+    <div class="recovery-icon" aria-hidden="true">
+      <span>✉</span>
+      <small>✓</small>
+    </div>
+    <div class="modal-title recovery-title">Recuperá tu acceso</div>
+    <p class="recovery-copy">
+      Escribí el correo con el que creaste tu cuenta. Cuando habilitemos el envío, vas a recibir ahí el enlace para elegir una contraseña nueva.
+    </p>
+    <label class="recovery-label" for="recovery-email">Correo electrónico</label>
+    <div class="recovery-input-wrap">
+      <span aria-hidden="true">✉</span>
+      <input id="recovery-email" type="email" autocomplete="email" inputmode="email" placeholder="nombre@correo.com">
+    </div>
+    <div id="recovery-status" class="recovery-status" role="status"></div>
+    <button class="btn btn-primary btn-full recovery-submit" onclick="requestPasswordRecovery()">Continuar</button>
+    <button class="recovery-back" type="button" onclick="closeMo('mo-password-recovery')">← Volver a iniciar sesión</button>
+    <div class="recovery-note">🔒 Nunca te vamos a pedir tu contraseña actual.</div>
   </div>
 </div>
 
@@ -478,6 +529,7 @@
 <script src="js/state.js"></script>
 <script src="js/data.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/cities.js"></script>
 <script src="js/whatsapp.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/auth.js"></script>
@@ -486,6 +538,7 @@
 <script src="js/week.js"></script>
 <script src="js/shopping.js"></script>
 <script src="js/promos.js"></script>
+<script src="js/experience.js"></script>
 <script src="app.js"></script>
 <script src="js/chef-animation.js"></script>
 

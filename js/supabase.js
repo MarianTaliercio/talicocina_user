@@ -3,12 +3,30 @@ const SUPABASE_KEY = 'sb_publishable_sEhwuKxRQodMSWCBaiQamg_wuFqqxwm';
 
 window.db = window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY);
 let foodProfileOptions = [];
+let availableBanks = [];
 
 async function loadFoodProfileOptions() {
   const { data, error } = await window.db.from('food_profile_options').select('category,name,is_active,sort_order').eq('is_active', true).order('sort_order').order('name');
   if (error) { console.warn('No se pudieron cargar opciones alimentarias', error); return; }
   foodProfileOptions = data || [];
   if (typeof renderFoodProfileOptions === 'function') renderFoodProfileOptions();
+  if (typeof renderRegistrationFoodOptions === 'function') renderRegistrationFoodOptions();
+}
+
+async function loadAvailableBanks() {
+  const { data, error } = await window.db.from('banks').select('id,name').eq('is_active', true).order('name');
+  if (error) { console.warn('No se pudieron cargar bancos', error); return; }
+  availableBanks = data || [];
+  let selectedName = '';
+  if (currentUser) {
+    const { data: primary } = await window.db.from('user_banks').select('banks(name)').eq('user_id', currentUser.id).eq('is_primary', true).maybeSingle();
+    selectedName = primary?.banks?.name || '';
+  }
+  const select = document.getElementById('pf-banco');
+  if (select) {
+    select.innerHTML = '<option value="">Sin preferencia</option>' + availableBanks.map(bank => `<option value="${bank.name}">${bank.name}</option>`).join('');
+    select.value = selectedName;
+  }
 }
 
 function parseJsonField(value, fallback = []) {
@@ -52,7 +70,7 @@ async function loadSupabaseData() {
     fetchSupabaseTable('recipes', normalizeRecipe, '*'),
     fetchSupabaseTable('promotions', normalizePromo, '*, banks(name), supermarkets(name), promotion_weekdays(weekday)')
   ]);
-  if (remoteRecipes !== null) { recipes = remoteRecipes.filter(recipe => recipe.isActive); localStorage.setItem('tc_recipes', JSON.stringify(recipes)); }
+  if (remoteRecipes !== null) { allRecipes = remoteRecipes.filter(recipe => recipe.isActive); recipes = [...allRecipes]; localStorage.setItem('tc_recipes', JSON.stringify(recipes)); }
   if (remotePromos !== null) { promos = remotePromos; localStorage.setItem('tc_promos', JSON.stringify(promos)); }
 }
 
@@ -61,10 +79,12 @@ async function loadRegistrationPlans() {
   if (error) { console.warn('No se pudieron cargar los planes', error); return; }
   const cards = { Gratuito: 'plan-gratuito', Plus: 'plan-mensual', Premium: 'plan-anual' };
   (data || []).forEach(plan => {
+    registrationPlanPrices[plan.name] = Number(plan.price || 0);
     const card = document.getElementById(cards[plan.name]);
     if (!card) return;
     card.querySelector('.plan-name').textContent = plan.name;
     card.querySelector('.plan-price').textContent = `${plan.currency || 'ARS'} ${Number(plan.price || 0).toLocaleString('es-AR')}`;
+    card.querySelector('.plan-price').dataset.currency = plan.currency || 'ARS';
     const interval = { monthly: 'por mes', quarterly: 'por trimestre', yearly: 'por año' }[plan.billing_interval] || '';
     card.querySelector('.plan-per').textContent = interval;
   });
@@ -159,14 +179,24 @@ async function saveRecipeSelection(key, recipeId) {
 
 async function loadProfessionalRecipes() {
   if (!currentUser) return;
-  const { data: referral } = await window.db.from('user_referrals').select('referral_code_id, referral_codes(source_type, owner_name)').eq('user_id', currentUser.id).maybeSingle();
-  if (!referral || referral.referral_codes?.source_type !== 'professional') return;
-  const { data: assignments, error } = await window.db.from('referral_code_recipes').select('recipe_id').eq('referral_code_id', referral.referral_code_id);
-  if (error || !(assignments || []).length) return;
-  const assignedIds = new Set(assignments.map(item => item.recipe_id));
-  recipes = recipes.filter(recipe => assignedIds.has(recipe.id));
+  if (!allRecipes.length) allRecipes = [...(recipes || [])];
+  const { data: catalog, error } = await window.db.rpc('get_my_professional_catalog');
+  if (error) {
+    console.warn('No se pudo cargar el catálogo profesional', error);
+    recipes = [...allRecipes];
+    return;
+  }
+  const hasProfessional = !!catalog?.has_professional;
+  currentUser.hasProfessionalCatalog = hasProfessional;
+  currentUser.professionalName = catalog?.professional_name || '';
+  const mode = currentUser.recipe_catalog_mode || (hasProfessional ? 'professional' : 'all');
+  if (!hasProfessional || mode === 'all') {
+    recipes = [...allRecipes];
+  } else {
+    const assignedIds = new Set(catalog?.recipe_ids || []);
+    recipes = allRecipes.filter(recipe => assignedIds.has(recipe.id));
+  }
   localStorage.setItem('tc_recipes', JSON.stringify(recipes));
-  currentUser.professionalName = referral.referral_codes.owner_name;
 }
 
 async function ensureUserProfile(authUser, values = {}) {
@@ -182,6 +212,8 @@ async function ensureUserProfile(authUser, values = {}) {
     city: source.city || '',
     personas: Number(source.personas) || 1,
     repetir_comidas: source.repetir_comidas ?? false
+    ,allergies: Array.isArray(source.allergies) ? source.allergies : []
+    ,dietary_preferences: Array.isArray(source.dietary_preferences) ? source.dietary_preferences : []
   };
   const { data, error } = await window.db.from('users').upsert(profile, { onConflict: 'id' }).select().single();
   if (error) throw error;

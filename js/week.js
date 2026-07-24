@@ -182,9 +182,82 @@ async function pickR(id){
 }
 
 // ── DETALLE RECETA ────────────────────────
+let detailRecipeId = null;
+
+function recipeForDetail(){
+  return recipes.find(recipe => recipe.id === detailRecipeId);
+}
+
+function recipeDisplayData(recipe){
+  const people = parseInt(currentUser?.personas || 2);
+  const factor = people / parseInt(recipe.porciones || 2);
+  const ingredients = (recipe.ingredientes || []).map(item => {
+    const amount = (parseFloat(item.c) || 0) * factor;
+    const displayAmount = amount % 1 === 0
+      ? amount.toFixed(0)
+      : (amount < 10 ? amount.toFixed(1) : Math.round(amount).toString());
+    return { name: item.n, quantity: `${displayAmount} ${item.u || ''}`.trim() };
+  });
+  return { people, ingredients, steps: recipe.pasos || [] };
+}
+
+function escapeRecipeHtml(value){
+  return String(value ?? '').replace(/[&<>"']/g, character => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+  })[character]);
+}
+
+function toggleRecipeIngredient(button){
+  button.classList.toggle('done');
+  button.closest('.ingr-item')?.classList.toggle('checked', button.classList.contains('done'));
+  button.setAttribute('aria-checked', button.classList.contains('done') ? 'true' : 'false');
+}
+
+function printRecipe(){
+  const recipe = recipeForDetail();
+  if(!recipe) return;
+  const data = recipeDisplayData(recipe);
+  const ingredients = data.ingredients.map(item =>
+    `<li><span class="box"></span><span>${escapeRecipeHtml(item.name)}</span><strong>${escapeRecipeHtml(item.quantity)}</strong></li>`
+  ).join('');
+  const steps = data.steps.map((step, index) =>
+    `<li><span class="number">${index + 1}</span><span>${escapeRecipeHtml(step)}</span></li>`
+  ).join('');
+  const printWindow = window.open('', '_blank', 'width=850,height=700');
+  if(!printWindow) return toast('Habilitá las ventanas emergentes para imprimir la receta.');
+  printWindow.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8">
+    <title>${escapeRecipeHtml(recipe.name)} - Tali Cocina</title>
+    <style>
+      @page{margin:16mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#243129;max-width:760px;margin:auto;line-height:1.45}
+      header{border-bottom:3px solid #5f8065;padding-bottom:12px;margin-bottom:22px}h1{font-family:Georgia,serif;margin:0 0 6px;font-size:30px}
+      .meta{color:#647068;font-size:13px}h2{font-size:16px;text-transform:uppercase;letter-spacing:.08em;margin:24px 0 10px;color:#4f7057}
+      ul,ol{list-style:none;padding:0;margin:0}.ingredients li{display:grid;grid-template-columns:22px 1fr auto;gap:9px;padding:7px 0;border-bottom:1px solid #d9dfda}
+      .box{width:16px;height:16px;border:1.7px solid #536158;border-radius:3px;margin-top:2px}.ingredients strong{font-size:13px}
+      .steps li{display:grid;grid-template-columns:28px 1fr;gap:10px;margin:0 0 13px}.number{width:25px;height:25px;border-radius:50%;background:#e2ece4;text-align:center;padding-top:2px;font-weight:bold}
+      footer{margin-top:28px;padding-top:10px;border-top:1px solid #d9dfda;color:#7a837d;font-size:11px}@media print{body{max-width:none}}
+    </style></head><body>
+    <header><h1>${escapeRecipeHtml(recipe.name)}</h1><div class="meta">Tali Cocina · Para ${data.people} persona${data.people !== 1 ? 's' : ''}${recipe.durationMinutes ? ` · ${escapeRecipeHtml(recipe.durationMinutes)} min` : ''}</div></header>
+    <h2>Ingredientes</h2><ul class="ingredients">${ingredients}</ul>
+    <h2>Preparación</h2><ol class="steps">${steps}</ol>
+    <footer>Imprimí esta hoja o elegí “Guardar como PDF” en el cuadro de impresión.</footer>
+    <script>window.onload=()=>{window.print()}<\/script></body></html>`);
+  printWindow.document.close();
+}
+
+function shareRecipeWhatsApp(){
+  const recipe = recipeForDetail();
+  if(!recipe) return;
+  const data = recipeDisplayData(recipe);
+  const ingredients = data.ingredients.map(item => `☐ ${item.name}: ${item.quantity}`).join('\n');
+  const steps = data.steps.map((step, index) => `${index + 1}. ${step}`).join('\n');
+  const text = `🍽️ *${recipe.name}*\nPara ${data.people} persona${data.people !== 1 ? 's' : ''}\n\n*Ingredientes*\n${ingredients}\n\n*Preparación*\n${steps}\n\nCompartido desde Tali Cocina`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+}
+
 function openDetail(rid){
   const r = recipes.find(x => x.id === rid);
   if(!r) return;
+  detailRecipeId = rid;
   const pers    = parseInt(currentUser?.personas || 2);
   const factor  = pers / parseInt(r.porciones || 2);
   const ytOk    = r.ytId && r.ytId.length === 11;
@@ -196,7 +269,7 @@ function openDetail(rid){
     let q = (parseFloat(i.c)||0) * factor;
     let d = q % 1 === 0 ? q.toFixed(0) : (q < 10 ? q.toFixed(1) : Math.round(q).toString());
     return `<div class="ingr-item" style="padding:.4rem 0">
-      <div class="ingr-chk"></div>
+      <button class="ingr-chk" type="button" role="checkbox" aria-checked="false" aria-label="Marcar ${escapeRecipeHtml(i.n)}" onclick="toggleRecipeIngredient(this)"></button>
       <div class="ingr-name">${i.n}</div>
       <div class="ingr-qty">${d} ${i.u}</div>
     </div>`;
@@ -212,6 +285,10 @@ function openDetail(rid){
     ${r.cals ? `<p style="font-size:13px;color:var(--ink3);margin-bottom:1rem">🔥 ${r.cals} kcal por porción · rinde ${r.porciones||2} porciones</p>` : ''}
     ${ingrs ? `<div style="font-size:12px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin:.75rem 0 .4rem">Ingredientes (para ${pers} persona${pers!==1?'s':''})</div>${ingrs}` : ''}
     ${steps ? `<div style="font-size:12px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin:.75rem 0 .75rem">Preparación</div>${steps}` : ''}
+    <div class="recipe-actions">
+      <button class="recipe-action recipe-action-print" type="button" onclick="printRecipe()">🖨️ Imprimir / guardar PDF</button>
+      <button class="recipe-action recipe-action-whatsapp" type="button" onclick="shareRecipeWhatsApp()">WhatsApp</button>
+    </div>
   `;
   openMo('mo-detail');
 }

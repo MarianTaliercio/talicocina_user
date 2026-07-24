@@ -2,9 +2,11 @@ function loadProfileIntoForm() {
   const u = currentUser || {}; ['name','apellido','email','city','personas'].forEach(field => { const el = document.getElementById(`pf-${field}`); if (el) el.value = u[field] || ''; });
   const whatsapp = document.getElementById('pf-wapp'); if (whatsapp) whatsapp.value = u.whatsapp || '';
   const repeat = currentUser?.repetir_comidas === true; setRepeatMeals(repeat, false); updateProfileHero();
+  renderRecipeCatalogSetting();
 }
 function updateProfileHero() { const name = document.getElementById('pf-name')?.value.trim() || ''; const apellido = document.getElementById('pf-apellido')?.value.trim() || ''; const city = document.getElementById('pf-city')?.value.trim() || ''; document.getElementById('profile-hero-name').textContent = `${name} ${apellido}`.trim() || 'Tu perfil'; document.getElementById('profile-hero-city').textContent = city ? `📍 ${city}` : ''; document.getElementById('nav-avatar').textContent = (name || 'U').slice(0,2).toUpperCase(); }
 async function renderPerfil() {
+  await loadAvailableBanks();
   loadProfileIntoForm();
   const { data } = await window.db.from('subscriptions').select('status,current_period_end,plans(name)').eq('user_id', currentUser.id).in('status', ['pending','active','past_due','paused']).maybeSingle();
   document.getElementById('subs-label').textContent = data?.plans?.name ? `Plan ${data.plans.name}` : 'Sin suscripción activa';
@@ -20,6 +22,30 @@ async function saveProfile() {
 function togChip(el) { el.classList.toggle('on'); }
 function togChipSingle(el, grpId) { document.querySelectorAll(`#${grpId} .chip`).forEach(chip => chip.classList.remove('on')); el.classList.add('on'); }
 function setRepeatMeals(value, save = true) { document.getElementById('repeat-si').classList.toggle('on', value); document.getElementById('repeat-no').classList.toggle('on', !value); if (currentUser) currentUser.repetir_comidas = value; if (save) updateProfileHero(); }
+
+function renderRecipeCatalogSetting() {
+  const setting = document.getElementById('recipe-catalog-setting');
+  if (!setting || !currentUser) return;
+  setting.style.display = currentUser.hasProfessionalCatalog ? '' : 'none';
+  const mode = currentUser.recipe_catalog_mode || 'professional';
+  document.getElementById('catalog-professional')?.classList.toggle('on', mode === 'professional');
+  document.getElementById('catalog-all')?.classList.toggle('on', mode === 'all');
+  const hint = document.getElementById('recipe-catalog-hint');
+  if (hint) hint.textContent = currentUser.professionalName ? `Catálogo preparado por ${currentUser.professionalName}.` : '';
+}
+
+async function setRecipeCatalogMode(mode) {
+  if (!currentUser || !['professional', 'all'].includes(mode)) return;
+  const { data, error } = await window.db.from('users').update({ recipe_catalog_mode: mode }).eq('id', currentUser.id).select().single();
+  if (error) return toast(`No se pudo cambiar el catálogo: ${error.message}`);
+  currentUser = { ...currentUser, ...data, hasProfessionalCatalog: currentUser.hasProfessionalCatalog, professionalName: currentUser.professionalName };
+  localStorage.setItem('tc_user', JSON.stringify(currentUser));
+  recipes = [...allRecipes];
+  await loadProfessionalRecipes();
+  renderRecipeCatalogSetting();
+  renderWeek();
+  toast(mode === 'professional' ? 'Mostrando recetas de tu nutricionista' : 'Mostrando todas las recetas');
+}
 
 function profileInitials(name, apellido) {
   return `${name || ''} ${apellido || ''}`.trim().split(/\s+/).filter(Boolean).map(part => part[0]).join('').slice(0, 2).toUpperCase() || 'U';
@@ -46,7 +72,13 @@ function updateProfileHero() {
 }
 
 async function saveProfile() {
+  if (!await validateCityInput('pf-city')) return toast('Elegí una ciudad válida de la lista.');
+  const { data: authData, error: authError } = await window.db.auth.getUser();
+  if (authError || !authData.user) return toast('Tu sesión venció. Volvé a iniciar sesión.');
+  const authUser = authData.user;
   const updated = {
+    id: authUser.id,
+    email: authUser.email,
     name: document.getElementById('pf-name').value.trim(),
     apellido: document.getElementById('pf-apellido').value.trim(),
     city: document.getElementById('pf-city').value.trim(),
@@ -69,9 +101,10 @@ async function saveProfile() {
     document.getElementById('pf-password').value = '';
   }
   try { await saveUserBank(currentUser.id, document.getElementById('pf-banco')?.value || ''); } catch (bankError) { console.warn(bankError); }
-  currentUser = data;
+  currentUser = { ...data, hasProfessionalCatalog: currentUser.hasProfessionalCatalog, professionalName: currentUser.professionalName };
   localStorage.setItem('tc_user', JSON.stringify(currentUser));
   updateProfileHero();
+  renderRecipeCatalogSetting();
   toast('Perfil guardado');
 }
 
@@ -139,6 +172,13 @@ function selectedProfileChips(groupId) {
   return [...document.querySelectorAll(`#${groupId} .chip.on`)].map(chip => chip.textContent.trim());
 }
 
+function renderRegistrationFoodOptions() {
+  const allergyTarget = document.getElementById('reg-allergies');
+  const preferenceTarget = document.getElementById('reg-preferences');
+  if (allergyTarget) allergyTarget.innerHTML = (foodProfileOptions || []).filter(option => option.category === 'allergy').map(option => `<button type="button" class="chip red" onclick="togChip(this)">${option.name}</button>`).join('');
+  if (preferenceTarget) preferenceTarget.innerHTML = (foodProfileOptions || []).filter(option => option.category === 'preference').map(option => `<button type="button" class="chip" onclick="togChip(this)">${option.name}</button>`).join('');
+}
+
 function restoreProfileChips(groupId, selected, single = false) {
   const wanted = new Set((selected || []).map(value => String(value).trim().toLocaleLowerCase()));
   const chips = [...document.querySelectorAll(`#${groupId} .chip`)];
@@ -152,7 +192,7 @@ function restoreProfileChips(groupId, selected, single = false) {
 function renderFoodProfileOptions() {
   const groups = [
     { id: 'alergias-chips', category: 'allergy', css: ' red', single: false },
-    { id: 'pref-chips', category: 'preference', css: '', single: true }
+    { id: 'pref-chips', category: 'preference', css: '', single: false }
   ];
   groups.forEach(group => {
     const target = document.getElementById(group.id);
@@ -174,25 +214,34 @@ function loadProfileIntoForm() {
   const whatsapp = document.getElementById('pf-wapp');
   if (whatsapp) whatsapp.value = user.whatsapp || '';
   restoreProfileChips('alergias-chips', user.allergies || []);
-  restoreProfileChips('pref-chips', user.dietary_preferences || [], true);
+  restoreProfileChips('pref-chips', user.dietary_preferences || []);
   setRepeatMeals(user.repetir_comidas === true, false);
   updateProfileHero();
+  renderRecipeCatalogSetting();
 }
 
 async function saveProfile() {
+  if (!await validateCityInput('pf-city')) return toast('Elegí una ciudad válida de la lista.');
+  const { data: authData, error: authError } = await window.db.auth.getUser();
+  if (authError || !authData.user) return toast('Tu sesión venció. Volvé a iniciar sesión.');
+  const authUser = authData.user;
   const updated = {
+    id: authUser.id,
+    email: authUser.email,
     name: document.getElementById('pf-name').value.trim(),
     apellido: document.getElementById('pf-apellido').value.trim(),
     city: document.getElementById('pf-city').value.trim(),
     whatsapp: document.getElementById('pf-wapp').value.trim(),
     personas: Number(document.getElementById('pf-personas').value) || 1,
     repetir_comidas: !!currentUser.repetir_comidas,
+    recipe_catalog_mode: currentUser.recipe_catalog_mode || 'professional',
     avatar: safeAvatar(currentUser.avatar) || null,
     allergies: selectedProfileChips('alergias-chips'),
     dietary_preferences: selectedProfileChips('pref-chips')
   };
-  const { data, error } = await window.db.from('users').update(updated).eq('id', currentUser.id).select().single();
+  const { data, error } = await window.db.from('users').upsert(updated, { onConflict: 'id' }).select().maybeSingle();
   if (error) return toast(`Error al guardar perfil: ${error.message}`);
+  if (!data) return toast('No se pudo recuperar el perfil guardado. Volvé a iniciar sesión.');
   const email = document.getElementById('pf-email').value.trim();
   const password = document.getElementById('pf-password').value;
   if (email && email !== currentUser.email) {
@@ -205,10 +254,11 @@ async function saveProfile() {
     if (passwordError) return toast(`Perfil guardado, pero no se actualizo la contrasena: ${passwordError.message}`);
     document.getElementById('pf-password').value = '';
   }
-  try { await saveUserBank(currentUser.id, document.getElementById('pf-banco')?.value || ''); } catch (bankError) { console.warn(bankError); }
-  currentUser = data;
+  try { await saveUserBank(authUser.id, document.getElementById('pf-banco')?.value || ''); } catch (bankError) { console.warn(bankError); }
+  currentUser = { ...data, hasProfessionalCatalog: currentUser.hasProfessionalCatalog, professionalName: currentUser.professionalName };
   localStorage.setItem('tc_user', JSON.stringify(currentUser));
   updateProfileHero();
+  renderRecipeCatalogSetting();
   toast('Perfil y avatar guardados');
 }
 

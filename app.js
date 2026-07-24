@@ -13,9 +13,11 @@ async function bootstrapApp(){
     if (user) currentUser = await ensureUserProfile(user, user.user_metadata || {});
   }
   if (currentUser) {
+    await loadAvailableBanks();
     await loadProfessionalRecipes();
     localStorage.setItem('tc_user', JSON.stringify(currentUser));
     await loadUserSelections();
+    if (typeof loadExperienceData === 'function') await loadExperienceData();
   }
 }
 

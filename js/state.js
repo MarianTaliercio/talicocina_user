@@ -20,12 +20,17 @@ const STORES = {
 
 // ── ESTADO ──────────────────────────────
 let recipes     = JSON.parse(localStorage.getItem('tc_recipes') || 'null');
+let allRecipes  = [];
 let promos      = JSON.parse(localStorage.getItem('tc_promos')  || 'null');
 let plan        = {};
 let checked     = {};
 let currentUser = JSON.parse(localStorage.getItem('tc_user')    || 'null');
 let showCals    = false;
 let selectedPlan= 'mensual';
+let referralValidated = false;
+let referralDiscount = 0;
+let referralFinalPrice = null;
+let registrationPlanPrices = {};
 let editKey     = null;
 let bankFilter  = '';
 let selectedWeekDay = null;
