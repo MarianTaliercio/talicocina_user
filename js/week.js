@@ -76,6 +76,17 @@ function selectWeekDay(day) { selectedWeekDay = day; renderWeek(); }
 async function selectPlannerDate(value) { plannerAnchorDate = value || null; selectedWeekDay = null; await loadUserSelections(); renderWeek(); }
 function mealTypeInfo(meal) { return meal === 'Cena' ? { icon: '🌙', time: '20:30', action: 'Cambiar cena' } : { icon: '☀️', time: '11:30', action: 'Cambiar almuerzo' }; }
 
+function foodToken(value) { return String(value || '').trim().toLocaleLowerCase('es-AR'); }
+function recipeFitsFoodProfile(recipe) {
+  const allergies = (currentUser?.allergies || []).map(foodToken).filter(Boolean);
+  const recipeAllergens = (recipe.allergens || []).map(foodToken);
+  if (allergies.some(allergy => recipeAllergens.includes(allergy))) return false;
+  const preferences = (currentUser?.dietary_preferences || []).map(foodToken).filter(Boolean);
+  const preference = preferences.find(value => value !== 'omnívoro' && value !== 'omnivoro');
+  if (!preference) return true;
+  return (recipe.dietaryTags || []).map(foodToken).includes(preference);
+}
+
 async function delMeal(key){
   try {
     await cancelRecipeSelection(key);
@@ -104,7 +115,7 @@ function openPick(day, meal){
     const permitirRepetidas = currentUser?.repetir_comidas ?? true;
 
     // Si no se permiten repetidas, ocultar las que ya están usadas
-    const recetasDisponibles = permitirRepetidas
+    const recetasDisponibles = (permitirRepetidas
       ? recipes
       : recipes.filter(r => {
           // Mantener visible la receta que ya está en esta casilla
@@ -112,7 +123,8 @@ function openPick(day, meal){
 
           // Ocultar recetas ya usadas en otra comida
           return !Object.values(plan).map(recipeIdForPlanValue).includes(r.id);
-        });
+        }))
+      .filter(recipe => recipeFitsFoodProfile(recipe));
 
     if(!recetasDisponibles.length){
       grid.innerHTML = `
@@ -136,6 +148,7 @@ function openPick(day, meal){
             ${img}
             <div class="pick-name">${r.name}</div>
             ${r.cals ? `<div class="pick-kcal">${r.cals} kcal</div>` : ''}
+            ${(r.dietaryTags || []).length ? `<div class="pick-kcal">${r.dietaryTags.join(' · ')}</div>` : ''}
             <button class="pick-preview" onclick="event.stopPropagation();openDetail('${r.id}')">Ver ingredientes y pasos</button>
           </div>
         `;
@@ -195,6 +208,7 @@ function openDetail(rid){
     ${hero}
     <div class="modal-title">${r.name}</div>
     ${ytBtn}
+    ${r.durationMinutes ? `<p style="font-size:13px;color:var(--ink3);margin:.55rem 0 1rem">⏱ ${r.durationMinutes} min de preparación</p>` : ''}
     ${r.cals ? `<p style="font-size:13px;color:var(--ink3);margin-bottom:1rem">🔥 ${r.cals} kcal por porción · rinde ${r.porciones||2} porciones</p>` : ''}
     ${ingrs ? `<div style="font-size:12px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin:.75rem 0 .4rem">Ingredientes (para ${pers} persona${pers!==1?'s':''})</div>${ingrs}` : ''}
     ${steps ? `<div style="font-size:12px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin:.75rem 0 .75rem">Preparación</div>${steps}` : ''}
@@ -240,6 +254,14 @@ function scheduleMealReminders() {
   const upcoming = [{ meal: 'Almuerzo', hour: 11, minute: 30 }, { meal: 'Cena', hour: 20, minute: 30 }].map(item => { const time = new Date(); time.setHours(item.hour, item.minute, 0, 0); if (time <= now) time.setDate(time.getDate() + 1); return { ...item, time }; }).sort((a, b) => a.time - b.time)[0];
   mealReminderTimer = setTimeout(() => { new Notification(`Tali Cocina · ${upcoming.meal}`, { body: `Es hora de ${upcoming.meal.toLowerCase()}. Mirá tu comida elegida.` }); scheduleMealReminders(); }, upcoming.time - now);
 }
+
+document.addEventListener('click', event => {
+  const card = event.target.closest('.meal-feature-card');
+  if (!card || event.target.closest('.meal-feature-action')) return;
+  const title = card.querySelector('.meal-feature-title')?.textContent.trim();
+  const recipe = recipes.find(item => item.name === title);
+  if (recipe) openDetail(recipe.id);
+});
 
 async function comidaguardada() {
   toast('Comida Guardada ✓')

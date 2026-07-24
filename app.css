@@ -470,6 +470,22 @@
 [data-theme="dark"] .auth-wrap { background:radial-gradient(circle at 18% 15%, rgba(63,181,133,.14), transparent 20rem), var(--bg); }
 [data-theme="dark"] .auth-card { border-color:rgba(121,217,169,.14); box-shadow:0 24px 60px rgba(0,0,0,.35); }
 [data-theme="dark"] .card, [data-theme="dark"] .meal-feature-card { box-shadow:0 8px 24px rgba(0,0,0,.18); }
+
+/* Paleta original de Tali: verde profundo, naranja cálido y crema. */
+body{background:radial-gradient(circle at top right,rgba(221,123,29,.13),transparent 28rem),var(--bg)}
+.topnav{background:var(--g1);border-bottom:1px solid rgba(255,255,255,.08)}
+.card{border-radius:18px;border-color:var(--line);box-shadow:0 5px 18px rgba(62,44,19,.07)}
+.btn-primary,.meal-feature-action{background:linear-gradient(135deg,var(--g2),var(--g3));box-shadow:0 7px 14px rgba(184,90,5,.2)}
+.btn-primary:hover,.meal-feature-action:hover{background:linear-gradient(135deg,var(--g1),var(--g2))}
+.week-day-tab.selected{background:var(--g2);color:#fff;box-shadow:0 7px 15px rgba(184,90,5,.22)}
+.meal-feature-card{border-radius:18px;transition:transform .18s ease,box-shadow .18s ease}.meal-feature-card:has(.meal-feature-title){cursor:pointer}.meal-feature-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(57,42,20,.13)}
+.meal-feature-label{color:var(--g2)}.meal-feature-description{font-weight:500}.meal-feature-action{position:relative;z-index:1}
+.bnav{background:var(--white);border-top:1px solid var(--line);box-shadow:0 -4px 18px rgba(57,42,20,.05)}.bnav-item.on{color:var(--g2)}.bnav-item.on .bnav-avatar{border-color:var(--g2)}
+[data-theme="dark"] body{background:radial-gradient(circle at top right,rgba(63,181,133,.16),transparent 30rem),var(--bg)}
+[data-theme="dark"] .topnav,[data-theme="dark"] .bnav{background:var(--white);border-color:var(--line)}
+[data-theme="dark"] .card,[data-theme="dark"] .meal-feature-card{border-color:var(--line);box-shadow:0 8px 24px rgba(0,0,0,.2)}
+[data-theme="dark"] .meal-feature-card:hover{box-shadow:0 12px 28px rgba(0,0,0,.3)}
+@media(max-width:480px){.meal-feature-card{border-radius:16px}.meal-feature-title{font-size:17px}.card{border-radius:16px}}
 [data-theme="dark"] .theme-btn { background:var(--g6); border-color:rgba(121,217,169,.2); }
 
 @media(min-width:1200px){

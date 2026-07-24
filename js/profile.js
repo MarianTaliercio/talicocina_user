@@ -135,14 +135,46 @@ function updateProfileHero() {
   updateProfileProgress();
 }
 
+function selectedProfileChips(groupId) {
+  return [...document.querySelectorAll(`#${groupId} .chip.on`)].map(chip => chip.textContent.trim());
+}
+
+function restoreProfileChips(groupId, selected, single = false) {
+  const wanted = new Set((selected || []).map(value => String(value).trim().toLocaleLowerCase()));
+  const chips = [...document.querySelectorAll(`#${groupId} .chip`)];
+  chips.forEach(chip => chip.classList.toggle('on', wanted.has(chip.textContent.trim().toLocaleLowerCase())));
+  if (single && !chips.some(chip => chip.classList.contains('on'))) {
+    const omnivore = chips.find(chip => chip.textContent.trim().toLocaleLowerCase() === 'omnívoro');
+    if (omnivore) omnivore.classList.add('on');
+  }
+}
+
+function renderFoodProfileOptions() {
+  const groups = [
+    { id: 'alergias-chips', category: 'allergy', css: ' red', single: false },
+    { id: 'pref-chips', category: 'preference', css: '', single: true }
+  ];
+  groups.forEach(group => {
+    const target = document.getElementById(group.id);
+    const options = (foodProfileOptions || []).filter(option => option.category === group.category);
+    if (!target || !options.length) return;
+    const selected = group.category === 'allergy' ? (currentUser?.allergies || []) : (currentUser?.dietary_preferences || []);
+    target.innerHTML = options.map(option => `<div class="chip${group.css}" onclick="${group.single ? `togChipSingle(this,'${group.id}')` : 'togChip(this)'}">${option.name}</div>`).join('');
+    restoreProfileChips(group.id, selected, group.single);
+  });
+}
+
 function loadProfileIntoForm() {
   const user = currentUser || {};
+  renderFoodProfileOptions();
   ['name', 'apellido', 'email', 'city', 'personas'].forEach(field => {
     const element = document.getElementById(`pf-${field}`);
     if (element) element.value = user[field] || '';
   });
   const whatsapp = document.getElementById('pf-wapp');
   if (whatsapp) whatsapp.value = user.whatsapp || '';
+  restoreProfileChips('alergias-chips', user.allergies || []);
+  restoreProfileChips('pref-chips', user.dietary_preferences || [], true);
   setRepeatMeals(user.repetir_comidas === true, false);
   updateProfileHero();
 }
@@ -155,7 +187,9 @@ async function saveProfile() {
     whatsapp: document.getElementById('pf-wapp').value.trim(),
     personas: Number(document.getElementById('pf-personas').value) || 1,
     repetir_comidas: !!currentUser.repetir_comidas,
-    avatar: safeAvatar(currentUser.avatar) || null
+    avatar: safeAvatar(currentUser.avatar) || null,
+    allergies: selectedProfileChips('alergias-chips'),
+    dietary_preferences: selectedProfileChips('pref-chips')
   };
   const { data, error } = await window.db.from('users').update(updated).eq('id', currentUser.id).select().single();
   if (error) return toast(`Error al guardar perfil: ${error.message}`);

@@ -2,6 +2,14 @@ const SUPABASE_URL = 'https://cvqhrbeophtkersnpsxr.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_sEhwuKxRQodMSWCBaiQamg_wuFqqxwm';
 
 window.db = window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY);
+let foodProfileOptions = [];
+
+async function loadFoodProfileOptions() {
+  const { data, error } = await window.db.from('food_profile_options').select('category,name,is_active,sort_order').eq('is_active', true).order('sort_order').order('name');
+  if (error) { console.warn('No se pudieron cargar opciones alimentarias', error); return; }
+  foodProfileOptions = data || [];
+  if (typeof renderFoodProfileOptions === 'function') renderFoodProfileOptions();
+}
 
 function parseJsonField(value, fallback = []) {
   if (Array.isArray(value)) return value;
@@ -12,8 +20,9 @@ function parseJsonField(value, fallback = []) {
 function normalizeRecipe(row) {
   return {
     id: row.id, name: row.name || '', ytUrl: row.youtube_url || '', ytId: row.youtube_id || '',
-    cals: Number(row.calories) || 0, porciones: Number(row.servings) || 1,
-    ingredientes: parseJsonField(row.ingredients), pasos: parseJsonField(row.steps), isActive: row.is_active !== false
+    cals: Number(row.calories) || 0, porciones: Number(row.servings) || 1, durationMinutes: Number(row.duration_minutes) || 0,
+    ingredientes: parseJsonField(row.ingredients), pasos: parseJsonField(row.steps),
+    allergens: parseJsonField(row.allergens), dietaryTags: parseJsonField(row.dietary_tags), isActive: row.is_active !== false
   };
 }
 

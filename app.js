@@ -5,6 +5,7 @@
 
 async function bootstrapApp(){
   await loadSupabaseData();
+  await loadFoodProfileOptions();
   await loadRegistrationPlans();
   currentUser = await getCurrentProfile();
   if (!currentUser) {
